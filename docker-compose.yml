@@ -1,0 +1,97 @@
+version: '3.4'
+services:
+
+  vpn:
+    container_name: vpn
+    image: dperson/openvpn-client:latest
+    cap_add:
+      - net_admin # required to modify network interfaces
+    restart: unless-stopped
+    volumes:
+      - /dev/net/tun:/dev/net/tun # tun device
+      - ${HOME}/.vpn:/vpn # OpenVPN configuration
+    ports:
+      - 8112:8112 # port for deluge web UI to be reachable from local network
+    command: '-r 192.168.1.0/24' # route local network traffic
+
+  deluge:
+    container_name: deluge
+    image: linuxserver/deluge:102
+    restart: unless-stopped
+    network_mode: service:vpn # run on the vpn network
+    environment:
+      - PUID=1000 # default user id, for downloaded files access rights
+      - PGID=1000 # default group id, for downloaded files access rights
+      - TZ=Europe/Paris # timezone
+    volumes:
+      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+      - ${HOME}/.config/deluge:/config # config files
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:100
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=1000 # default user id, for downloaded files access rights
+      - PGID=1000 # default group id, for downloaded files access rights
+      - TZ=Europe/Paris # timezone
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /media/${USER}/data1/downloads/ongoing/torrent-blackhole:/downloads # place where to put .torrent files
+      - ${HOME}/.config/jackett:/config # config files
+
+  nzbget:
+    container_name: nzbget
+    image: linuxserver/nzbget:101
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=1000 # default user id, for downloaded files access rights
+      - PGID=1000 # default group id, for downloaded files access rights
+      - TZ=Europe/Paris # timezone
+    volumes:
+      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+      - ${HOME}/.config/nzbget:/config # config files
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:109
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=1000 # default user id, for downloaded files access rights
+      - PGID=1000 # default group id, for downloaded files access rights
+      - TZ=Europe/Paris # timezone
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${HOME}/.config/sonarr:/config # config files
+      - /media/${USER}/data1/downloads/series:/tv # tv shows folder
+      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:80
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=1000 # default user id, for downloaded files access rights
+      - PGID=1000 # default group id, for downloaded files access rights
+      - TZ=Europe/Paris # timezone
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${HOME}/.config/radarr:/config # config files
+      - /media/${USER}/data1/downloads/movies:/movies # movies folder
+      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+
+  plex-server:
+    container_name: plex-server
+    image: plexinc/pms-docker:1.10.1.4602-f54242b6b
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Paris # timezone
+    network_mode: host
+    volumes:
+      - ${HOME}/.plex/db:/config # plex database
+      - ${HOME}/.plex/transcode:/transcode # temp transcoded files
+      - /media/${USER}/data1/downloads:/data # media library
