@@ -17,7 +17,7 @@ services:
   deluge:
     container_name: deluge
     image: linuxserver/deluge:102
-    restart: unless-stopped
+    restart: always
     network_mode: service:vpn # run on the vpn network
     environment:
       - PUID=1000 # default user id, for downloaded files access rights
