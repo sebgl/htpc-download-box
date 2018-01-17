@@ -2,7 +2,7 @@
 
 Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
 
-TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), read for watch, in a beautiful media player.
+TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), ready to watch, in a beautiful media player.
 All automated.
 
 ## Table of Contents
@@ -57,15 +57,16 @@ This is what I have set up at home to handle TV shows and movies automated downl
 
 How does it work? I rely on several tools integrated together. They're all open-source, and deployed as Docker containers on my Linux server.
 
-The common workflow is detailed in this first section to give you an idea of how it works.
+The common workflow is detailed in this first section to give you an idea of how things work.
 
 ### Monitor TV shows/movies with Sonarr and Radarr
 
 Using [Sonarr](https://sonarr.tv/) Web UI, search for a TV show by name and mark it as monitored. You can specify a language and the required quality (1080p for instance). Sonarr will automatically take care of analyzing existing episodes and seasons of this TV show. It compares what you have on disk with the TV show release schedule, and triggers download for missing episodes. It also takes care of upgrading your existing episodes if a better quality matching your criterias is available out there.
 
 ![Monitor Mr Robot season 1](img/mr_robot_season1.png)
+Sonarr triggers download batches for entire seasons. But it also handle upcoming episodes and seasons on-the-fly. No human intervention is required for all the episodes to be released from now on.
 
-When the download is over, Sonarr moves the file to the appropriate location (my-tv-shows/show-name/season-1/01-title.mp4). Sonarr triggers download batches for entire seasons. But it also handle upcoming episodes and seasons on-the-fly. No human intervention is required for all the episodes to be released from now on.
+When the download is over, Sonarr moves the file to the appropriate location (`my-tv-shows/show-name/season-1/01-title.mp4`), and renames the file if needed.
 
 ![Sonarr calendar](img/sonarr_calendar.png)
 
@@ -98,7 +99,7 @@ Both are daemons coming with a nice Web UI, making them perfect candidates for b
 
 Both are very standard and popular tools. I'm using them for their integration with Sonarr/Radarr but also as standalone downloaders for everything else.
 
-For security and anonymity reasons, I'm running *Deluge behind a VPN connection*. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
+For security and anonymity reasons, I'm running Deluge behind a VPN connection. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
 
 ### Organize libraries, fetch subtitles and play videos with Plex
 
