@@ -2,6 +2,9 @@
 
 Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
 
+TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), read for watch, in a beautiful media player.
+All automated.
+
 ## Table of Contents
 
 - [HTPC Download Box](#htpc-download-box)
@@ -9,8 +12,8 @@ Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
   - [Overview](#overview)
     - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
     - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
-    - [Handle torrent and usenet downloads](#handle-torrent-and-usenet-downloads)
-    - [Organize library, fetc subtitles and play videos with Plex](#organize-library-fetc-subtitles-and-play-videos-with-plex)
+    - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
+    - [Organize libraries, fetch subtitles and play videos with Plex](#organize-libraries-fetch-subtitles-and-play-videos-with-plex)
   - [Hardware configuration](#hardware-configuration)
   - [Sumarry of the software stack](#sumarry-of-the-software-stack)
     - [Downloaders](#downloaders)
@@ -19,18 +22,17 @@ Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
     - [Media Center](#media-center)
   - [Installation guide](#installation-guide)
     - [Introduction](#introduction)
-    - [Install Docker](#install-docker)
-    - [Install docker-compose](#install-docker-compose)
+    - [Install docker and docker-compose](#install-docker-and-docker-compose)
     - [Setup Deluge](#setup-deluge)
       - [Docker container](#docker-container)
       - [Configuration](#configuration)
     - [Setup a VPN Container](#setup-a-vpn-container)
       - [Introduction](#introduction)
-      - [VPN setup with privateinternetaccess.com](#vpn-setup-with-privateinternetaccesscom)
+      - [privateinternetaccess.com custom setup](#privateinternetaccesscom-custom-setup)
       - [Docker container](#docker-container)
     - [Setup Jackett](#setup-jackett)
       - [Docker container](#docker-container)
-      - [Usage](#usage)
+      - [Configuration and usage](#configuration-and-usage)
     - [Setup NZBGet](#setup-nzbget)
       - [Docker container](#docker-container)
       - [Configuration and usage](#configuration-and-usage)
@@ -55,11 +57,11 @@ Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
 
 This is what I have set up at home to handle TV shows and movies automated download, sort and play.
 
-Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only.
+*Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only.*
 
 How does it work? I rely on several tools integrated together. They're all open-source, and deployed as Docker containers on my Linux server.
 
-The common workflow is the following:
+The common workflow is detailed in this first section to give you an idea of how it works.
 
 ### Monitor TV shows/movies with Sonarr and Radarr
 
@@ -87,7 +89,7 @@ However this common protocol does not really exist for torrent indexers. That's 
 
 The best release matching your criteria is selected by Sonarr/Radarr (eg. non-blacklisted 1080p release with enough seeds). Then the download is passed on to another set of tools.
 
-### Handle torrent and usenet downloads
+### Handle bittorrent and usenet downloads with Deluge and NZBGet
 
 Sonarr and Radarr are plugged to downloaders for our 2 different systems:
 
@@ -100,16 +102,20 @@ Both are very standard and popular tools. I'm using them for their integration w
 
 For security and anonymity reasons, I'm running *Deluge behind a VPN connection*. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
 
-### Organize library, fetc subtitles and play videos with Plex
+### Organize libraries, fetch subtitles and play videos with Plex
 
 [Plex](https://www.plex.tv/) Media Server organize all your medias as libraries. You can set up one for TV shows and another one for movies.
 It automatically grabs metadata for each new release (description, actors, images, release date). A very nice feature that we'll use a lot is the [sub-zero plugin](https://github.com/pannal/Sub-Zero.bundle). Whenever a new video arrives in Plex library, sub-zero automatically searches and downloads the most appropriate subtitle from a list of subtitle providers, based on several criterias (release name, quality, popularity, etc).
 
 [[Plex img]]
 
-Plex comes with [clients](https://www.plex.tv/apps/) in a lot of different systems (Web UI, Linux, Windows, OSX, iOS, Android, Android TV, Chromecast, PS4, Smart TV, etc.) that allow you to display and watch all your shows/movies in a nice Netflix-like UI.
+Plex keeps track of your position in the entire library: what episode of a given TV show season you've watched, what movie you've not watched yet, what episode was added to the library since last time. It also remembers where you stopped within a video file. Basically you can pause a movie in your bedroom, then resume playback from another device in your bathroom.
 
 [[Plex img]]
+
+Plex comes with [clients](https://www.plex.tv/apps/) in a lot of different systems (Web UI, Linux, Windows, OSX, iOS, Android, Android TV, Chromecast, PS4, Smart TV, etc.) that allow you to display and watch all your shows/movies in a nice Netflix-like UI.
+
+The server has transcoding abilities: it automatically transcodes video quality if needed (eg. stream your 1080p movie in 480p if watched from a mobile with low bandwidth).
 
 ## Hardware configuration
 
@@ -127,7 +133,7 @@ To give you a clear list of what we'll deploy and configure:
 
 - [Deluge](http://deluge-torrent.org): torrent downloader with a web UI
 - [NZBGet](https://nzbget.net): usenet downloader with a web UI
-- Jackett: fetch torrent files from many torrent sources
+- [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
 
 ### Download orchestration
 
@@ -152,16 +158,16 @@ We'll reuse community-maintained images (special thanks to [linuxserver.io](http
 I'm assuming you have some basic knowledge of Linux and Docker.
 I'll try to maintain my own `docker-compose` file [here](https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml).
 
-The stack is not really plug-and-play. You'll see that manual human configuration is required for most of these tools; they are not fully automated (yet?), but are persisted on reboot. Some steps also depend on external accounts that you need to set up yourself (usenet indexers, torrent indexers, vpn server, plex account, etc.). We'll walk through it.
+The stack is not really plug-and-play. You'll see that manual human configuration is required for most of these tools. Configuration is not fully automated (yet?), but is persisted on reboot. Some steps also depend on external accounts that you need to set up yourself (usenet indexers, torrent indexers, vpn server, plex account, etc.). We'll walk through it.
 
-Optional steps that you may wish to skip:
+Optional steps described below that you may wish to skip:
 
-- Using a VPN server for Deluge incoming/outgoing traffic
-- Using Usenet/newsgroups: you can skip NZBGet installation and all related Sonarr/Radarr indexers configuration
+- Using a VPN server for Deluge incoming/outgoing traffic.
+- Using newsgroups (Usenet): you can skip NZBGet installation and all related Sonarr/Radarr indexers configuration if you wish to use bittorrent only.
 
-### Install Docker
+### Install docker and docker-compose
 
-See the [official instructions](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce-1).
+See the [official instructions](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce-1) to install Docker.
 
 Then add yourself to the `docker` group:
 `sudo usermod -aG docker zao`
@@ -169,9 +175,7 @@ Then add yourself to the `docker` group:
 Make sure it works fine:
 `docker run hello-world`
 
-### Install docker-compose
-
-See the [official instructions](https://docs.docker.com/compose/install/#install-compose).
+Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
 
 ### Setup Deluge
 
@@ -202,14 +206,12 @@ Things to notice:
 - I use the host network to simplify configuration. Important ports are `8112` (web UI) and `58846` (bittorrent daemon).
 - Set both volumes accordingly to your desired setup. I chose to store downloaded files on an external volume, and configuration files in my HOME directory.
 
-Then run the container:
-`docker-compose up -d`
-To follow container logs, run:
-`docker-compose logs -f deluge`
+Then run the container with `docker-compose up -d`.
+To follow container logs, run `docker-compose logs -f deluge`.
 
 #### Configuration
 
-Then, you should be able to login on the web UI (`localhost:8112`, replace `localhost` by your machine ip if needed).
+You should be able to login on the web UI (`localhost:8112`, replace `localhost` by your machine ip if needed).
 
 [[TODO: img]]
 
@@ -241,22 +243,25 @@ The goal here is to have an OpenVPN Client container running and always connecte
 
 This must come up with some safety features:
 
-- a) VPN connection should be restarted if not responsive
-- b) Traffic should be allowed through the VPN tunnel *only*, no leaky outgoing connection if the VPN is down
-- c) Deluge Web UI should still be reachable from the local network
+1. VPN connection should be restarted if not responsive
+1. Traffic should be allowed through the VPN tunnel *only*, no leaky outgoing connection if the VPN is down
+1. Deluge Web UI should still be reachable from the local network
 
 Lucky me, someone already [set that up quite nicely](https://github.com/dperson/openvpn-client).
 
-Point a) is resolved through the OpenVPN configuration (`ping-restart` set to 120 sec by default).
-Point b) is resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L52-L87)
-Point c) is also resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L104)
+Point 1 is resolved through the OpenVPN configuration (`ping-restart` set to 120 sec by default).
+Point 2 is resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L52-L87)
+Point 3 is also resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L104)
 
-Configuration is explained on the [project page](https://github.com/dperson/openvpn-client), but is not that easy depending on your VPN server settings.
+Configuration is explained on the [project page](https://github.com/dperson/openvpn-client), you can follow it.
+However it is not that easy depending on your VPN server settings.
 I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 
-#### VPN setup with privateinternetaccess.com
+#### privateinternetaccess.com custom setup
 
-Download [privateinternetaccess.com OpenVPN configuration](https://privateinternetaccess.com/openvpn/openvpn.zip).
+*Note*: this section only applies for [PIA](https://privateinternetaccess.com) accounts.
+
+Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
 Copy the 3 files to `${HOME}/.vpn`.
 Create a 4th file `auth` with the following content:
@@ -318,7 +323,7 @@ vpn:
 
  deluge:
     container_name: deluge
-    image: linuxserver/deluge:latest
+    image: linuxserver/deluge:102
     restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
@@ -366,7 +371,7 @@ An interesting setting is the torrent blackhole directory. When you do manual se
 
 As usual, run with `docker-compose up -d`.
 
-#### Usage
+#### Configuration and usage
 
 Jackett web UI is available on port 9117.
 
@@ -584,7 +589,7 @@ On the rightmost tab, you'll also see that you can setup Lists of movies. What i
 
 This can be set up in `Settings/Lists`. I activated the following lists:
 
-- StevenLu: that's an interesting project that tries to determine by certain heuristics the current popular movies. See https://github.com/sjlu/popular-movies.
+- StevenLu: that's an [interesting project](https://github.com/sjlu/popular-movies) that tries to determine by certain heuristics the current popular movies.
 - IMDB TOP 250 movies of all times from Radarr Lists presets
 - Trakt Lists Trending and Popular movies
 
