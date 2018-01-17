@@ -85,7 +85,7 @@ I'm using both systems simultaneously, torrents being used only when a release i
 Files are searched automatically by Sonarr/Radarr through a list of  *indexers* that you have to configure. Indexers are APIs that allow searching for particular releases organized by categories. Think browsing the Pirate Bay programmatically. This is a pretty common feature for newsgroups indexers that respect a common API (called `Newznab`).
 However this common protocol does not really exist for torrent indexers. That's why we'll be using another tool called [Jackett](https://github.com/Jackett/Jackett). You can consider it as a local proxy API for the most popular torrent indexers. It searches and parse information from heterogeneous websites.
 
-The best release matching your criteria is selected by Sonarr/Radarr (eg. non-blacklisted 1080p release with enough seeds). Then the download is passed on to another set of tools. 
+The best release matching your criteria is selected by Sonarr/Radarr (eg. non-blacklisted 1080p release with enough seeds). Then the download is passed on to another set of tools.
 
 ### Handle torrent and usenet downloads
 
@@ -116,7 +116,6 @@ Plex comes with [clients](https://www.plex.tv/apps/) in a lot of different syste
 I'm using an old [Proliant MicroServer N54L](http://www.minimachines.net/promos-et-sorties/bon-plan-un-micro-serveur-hp-proliant-4-emplacements-a-169e-371) (2 cores, 2.20GHz) that I tweaked a bit to have 6GB RAM, an additional graphic card for better Full HD decoding, and an additional 2TB disk for data.
 
 It has Ubuntu 17.10.1 with Docker installed.
-
 
 You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The stack should work fine on all these systems, but you'll have to adapt the Docker stack below to your OS. I'll only focus on a standard Linux installation here.
 
@@ -585,7 +584,7 @@ On the rightmost tab, you'll also see that you can setup Lists of movies. What i
 
 This can be set up in `Settings/Lists`. I activated the following lists:
 
-- StevenLu: that's an interesting project that tries to determine by certain heuristics the current -opular movies. See https://github.com/sjlu/popular-movies.
+- StevenLu: that's an interesting project that tries to determine by certain heuristics the current popular movies. See https://github.com/sjlu/popular-movies.
 - IMDB TOP 250 movies of all times from Radarr Lists presets
 - Trakt Lists Trending and Popular movies
 
