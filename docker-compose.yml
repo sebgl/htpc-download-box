@@ -16,7 +16,7 @@ services:
 
   deluge:
     container_name: deluge
-    image: linuxserver/deluge:102
+    image: linuxserver/deluge:latest
     restart: always
     network_mode: service:vpn # run on the vpn network
     environment:
@@ -29,7 +29,7 @@ services:
 
   jackett:
     container_name: jackett
-    image: linuxserver/jackett:100
+    image: linuxserver/jackett:latest
     restart: unless-stopped
     network_mode: host
     environment:
@@ -43,7 +43,7 @@ services:
 
   nzbget:
     container_name: nzbget
-    image: linuxserver/nzbget:101
+    image: linuxserver/nzbget:latest
     restart: unless-stopped
     network_mode: host
     environment:
@@ -56,7 +56,7 @@ services:
 
   sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr:109
+    image: linuxserver/sonarr:latest
     restart: unless-stopped
     network_mode: host
     environment:
@@ -71,7 +71,7 @@ services:
 
   radarr:
     container_name: radarr
-    image: linuxserver/radarr:80
+    image: linuxserver/radarr:latest
     restart: unless-stopped
     network_mode: host
     environment:
@@ -86,7 +86,7 @@ services:
 
   plex-server:
     container_name: plex-server
-    image: plexinc/pms-docker:1.10.1.4602-f54242b6b
+    image: plexinc/pms-docker:latest
     restart: unless-stopped
     environment:
       - TZ=Europe/Paris # timezone
