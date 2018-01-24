@@ -298,6 +298,7 @@ crl-verify /vpn/crl.rsa.2048.pem # to be reachable inside the container
 ca /vpn/ca.rsa.2048.crt # to be reachable inside the container
 disable-occ
 keepalive 10 30 # send a ping every 10 sec and reconnect after 30 sec of unsuccessfull pings
+pull-filter ignore "auth-token" # fix PIA reconnection auth error that may occur every 8 hours
 ```
 
 #### Docker container
