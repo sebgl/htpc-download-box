@@ -19,7 +19,7 @@ services:
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
-    restart: always
+    restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
       - PUID=${PUID} # default user id, defined in .env 
