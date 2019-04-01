@@ -562,11 +562,13 @@ In `Connect` tab, we'll configure Sonarr to send notifications to Plex when a ne
 
 #### Give it a try
 
-Let's add a serie !
+Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-Enter the serie name, then you can choose a few things:
+*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files*
+
+Enter the series name, then you can choose a few things:
 
 - Monitor: what episodes do you want to mark as monitored? All future episodes, all episodes from all seasons, only latest seasons, nothing? Monitored episodes are the episodes Sonarr will download automatically.
 - Profile: quality profile of the episodes you want (HD-1080p is the most popular I guess).
