@@ -456,9 +456,13 @@ I have two libraries:
 - Movies
 - TV shows
 
-Both are materialized by different folders in my media library mounted volume, so I just added them.
+Make these the library paths:
+- Movies: `/data/movies`
+- TV: `/data/tv`
 
-Plex will then scan your files and gather extra content; it may take some time according to how large your directory is.
+As you'll see later, these library directories will each have files automatically placed into them with Radarr (movies) and Sonarr (tv), respectively.
+
+Now, Plex will then scan your files and gather extra content; it may take some time according to how large your directory is.
 
 A few things I like to configure in the settings:
 
