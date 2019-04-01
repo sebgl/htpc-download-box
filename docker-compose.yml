@@ -22,11 +22,11 @@ services:
     restart: always
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TZ} # timezone
+      - PUID=${PUID} # default user id, defined in .env 
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - ${ROOT}/downloads:/downloads # download folder
+      - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
 
   jackett:
@@ -35,12 +35,12 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TZ} # timezone
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files
+      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
 
   nzbget:
@@ -49,10 +49,10 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TZ} # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - ${ROOT}/downloads:/downloads # download folder
       - ${ROOT}/config/nzbget:/config # config files
 
@@ -62,10 +62,10 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TZ} # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/config/sonarr:/config # config files
       - ${ROOT}/complete/tv:/tv # tv shows folder
@@ -77,10 +77,10 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=${PUID} # default user id, for downloaded files access rights
-      - PGID=${PGID} # default group id, for downloaded files access rights
-      - TZ=${TZ} # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/config/radarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
@@ -91,7 +91,7 @@ services:
     image: plexinc/pms-docker:latest
     restart: unless-stopped
     environment:
-      - TZ=${TZ} # timezone
+      - TZ=${TZ} # timezone, defined in .env
     network_mode: host
     volumes:
       - ${ROOT}/config/plex/db:/config # plex database
