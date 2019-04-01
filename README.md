@@ -261,7 +261,7 @@ I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
 Copy the 3 files to `${HOME}/.vpn`.
-Create a 4th file `auth` with the following content:
+Create a 4th file `vpn.auth` with the following content:
 
 ```Text
 <pia username>
@@ -300,6 +300,8 @@ disable-occ
 keepalive 10 30 # send a ping every 10 sec and reconnect after 30 sec of unsuccessfull pings
 pull-filter ignore "auth-token" # fix PIA reconnection auth error that may occur every 8 hours
 ```
+
+Then, rename `<country>.ovpn` to `vpn.conf`
 
 #### Docker container
 
