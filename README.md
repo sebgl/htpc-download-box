@@ -566,7 +566,7 @@ Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files*
+*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files.*
 
 Enter the series name, then you can choose a few things:
 
