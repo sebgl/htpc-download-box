@@ -287,8 +287,9 @@ I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 
 Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
+
 Copy the 3 files to `${ROOT}/config/vpn`.
-Create a 4th file `auth` with the following content:
+Create a 4th file `vpn.auth` with the following content:
 
 ```Text
 <pia username>
@@ -327,6 +328,8 @@ disable-occ
 keepalive 10 30 # send a ping every 10 sec and reconnect after 30 sec of unsuccessfull pings
 pull-filter ignore "auth-token" # fix PIA reconnection auth error that may occur every 8 hours
 ```
+
+Then, rename `<country>.ovpn` to `vpn.conf`
 
 #### Docker container
 
@@ -485,9 +488,13 @@ I have two libraries:
 - Movies
 - TV shows
 
-Both are materialized by different folders in my media library mounted volume, so I just added them.
+Make these the library paths:
+- Movies: `/data/movies`
+- TV: `/data/tv`
 
-Plex will then scan your files and gather extra content; it may take some time according to how large your directory is.
+As you'll see later, these library directories will each have files automatically placed into them with Radarr (movies) and Sonarr (tv), respectively.
+
+Now, Plex will then scan your files and gather extra content; it may take some time according to how large your directory is.
 
 A few things I like to configure in the settings:
 
@@ -591,11 +598,13 @@ In `Connect` tab, we'll configure Sonarr to send notifications to Plex when a ne
 
 #### Give it a try
 
-Let's add a serie !
+Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-Enter the serie name, then you can choose a few things:
+*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files.*
+
+Enter the series name, then you can choose a few things:
 
 - Monitor: what episodes do you want to mark as monitored? All future episodes, all episodes from all seasons, only latest seasons, nothing? Monitored episodes are the episodes Sonarr will download automatically.
 - Profile: quality profile of the episodes you want (HD-1080p is the most popular I guess).
