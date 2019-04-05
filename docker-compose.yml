@@ -8,8 +8,10 @@ services:
       - net_admin # required to modify network interfaces
     restart: unless-stopped
     volumes:
-      - /dev/net/tun:/dev/net/tun # tun device
-      - ${HOME}/.vpn:/vpn # OpenVPN configuration
+      - /dev/net:/dev/net:z # tun device
+      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
+    security_opt:
+      - label:disable
     ports:
       - 8112:8112 # port for deluge web UI to be reachable from local network
     command: '-r 192.168.1.0/24' # route local network traffic
@@ -17,15 +19,15 @@ services:
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
-    restart: always
+    restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
+      - PUID=${PUID} # default user id, defined in .env 
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
-      - ${HOME}/.config/deluge:/config # config files
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${ROOT}/config/deluge:/config # config files
 
   jackett:
     container_name: jackett
@@ -33,13 +35,13 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /media/${USER}/data1/downloads/ongoing/torrent-blackhole:/downloads # place where to put .torrent files
-      - ${HOME}/.config/jackett:/config # config files
+      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+      - ${ROOT}/config/jackett:/config # config files
 
   nzbget:
     container_name: nzbget
@@ -47,12 +49,12 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
-      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
-      - ${HOME}/.config/nzbget:/config # config files
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
+      - ${ROOT}/downloads:/downloads # download folder
+      - ${ROOT}/config/nzbget:/config # config files
 
   sonarr:
     container_name: sonarr
@@ -60,14 +62,14 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${HOME}/.config/sonarr:/config # config files
-      - /media/${USER}/data1/downloads/series:/tv # tv shows folder
-      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+      - ${ROOT}/config/sonarr:/config # config files
+      - ${ROOT}/complete/tv:/tv # tv shows folder
+      - ${ROOT}/downloads:/downloads # download folder
 
   radarr:
     container_name: radarr
@@ -75,23 +77,23 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${HOME}/.config/radarr:/config # config files
-      - /media/${USER}/data1/downloads/movies:/movies # movies folder
-      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+      - ${ROOT}/config/radarr:/config # config files
+      - ${ROOT}/complete/movies:/movies # movies folder
+      - ${ROOT}/downloads:/downloads # download folder
 
   plex-server:
     container_name: plex-server
     image: plexinc/pms-docker:latest
     restart: unless-stopped
     environment:
-      - TZ=Europe/Paris # timezone
+      - TZ=${TZ} # timezone, defined in .env
     network_mode: host
     volumes:
-      - ${HOME}/.plex/db:/config # plex database
-      - ${HOME}/.plex/transcode:/transcode # temp transcoded files
-      - /media/${USER}/data1/downloads:/data # media library
+      - ${ROOT}/config/plex/db:/config # plex database
+      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+      - ${ROOT}/complete:/data # media library

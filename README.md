@@ -153,7 +153,7 @@ You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The 
 The idea is to set up all these components as Docker containers in a `docker-compose.yml` file.
 We'll reuse community-maintained images (special thanks to [linuxserver.io](https://www.linuxserver.io/) for many of them).
 I'm assuming you have some basic knowledge of Linux and Docker.
-I'll try to maintain my own `docker-compose` file [here](https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml).
+A general-purpose `docker-compose` file is maintained in this repo [here](https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml).
 
 The stack is not really plug-and-play. You'll see that manual human configuration is required for most of these tools. Configuration is not fully automated (yet?), but is persisted on reboot. Some steps also depend on external accounts that you need to set up yourself (usenet indexers, torrent indexers, vpn server, plex account, etc.). We'll walk through it.
 
@@ -173,6 +173,33 @@ Make sure it works fine:
 `docker run hello-world`
 
 Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
+### (optional) Use premade docker-compose
+
+This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
+
+1. First, `git clone https://github.com/sebgl/htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
+2. Rename the `.env.example` file included in the repo to `.env`.
+3. Continue this guide, and the docker-compose file snippets you see are already ready for you to use. You'll still need to manually configure your `.env` file and other manual configurations.
+
+### Setup environment variables
+
+For each of these images, there is some unique coniguration that needs to be done. Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
+
+Here is an example of what your `.env` file should look like, use values that fit for your own setup.
+
+```sh
+# Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TZ=America/New_York
+PUID=1000
+PGID=1000
+# The directory where data and configuration will be stored.
+ROOT=/media/my_user/storage/homemedia
+```
+Things to notice:
+
+- TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+- The PUID and PGID are your user's ids. Find them with `id $USER`.
+- This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
 
 ### Setup Deluge
 
@@ -183,25 +210,23 @@ We'll use deluge Docker image from linuxserver, which runs both the deluge daemo
 ```yaml
 version: '3'
 services:
-
   deluge:
     container_name: deluge
-    image: linuxserver/deluge:102
-    network_mode: host # run on the host network directly, web UI on port 8112
+    image: linuxserver/deluge:latest
+    restart: always
+    network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
+      - PUID=${PUID} # default user id, defined in .env 
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - /media/${USER}/data1/downloads/deluge:/downloads # download folder
-      - ${HOME}/.config/deluge:/config # config files
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${ROOT}/config/deluge:/config # config files
 ```
 
 Things to notice:
 
-- replace PUID and GUID with your own user UID and GID (run `id $USER` to get them)
 - I use the host network to simplify configuration. Important ports are `8112` (web UI) and `58846` (bittorrent daemon).
-- Set both volumes accordingly to your desired setup. I chose to store downloaded files on an external volume, and configuration files in my HOME directory.
 
 Then run the container with `docker-compose up -d`.
 To follow container logs, run `docker-compose logs -f deluge`.
@@ -219,13 +244,15 @@ The running deluge daemon should be automatically detected and appear as online,
 ![Deluge daemon](img/deluge_daemon.png)
 
 You may want to change the download directory. I like to have to distinct directories for incomplete (ongoing) downloads, and complete (finished) ones.
-Also, I set up a blackhole directory: every torrent file in there will be downloaded automatically. This is useful for Jackett manual searches. You should activate `autoadd` in the plugins section: it adds supports for `.magnet` files.
+Also, I set up a blackhole directory: every torrent file in there will be downloaded automatically. This is useful for Jackett manual searches.
+
+You should activate `autoadd` in the plugins section: it adds supports for `.magnet` files.
 
 ![Deluge paths](img/deluge_path.png)
 
 You can also tweak queue settings, defaults are fairly small. Also you can decide to stop seeding after a certain ratio is reached. That will be useful for Sonarr, since Sonarr can only remove finished downloads from deluge when the torrent has stopped seeding. Setting a very low ratio is not very fair though !
 
-Configuration gets stored automatically in your mounted volume (`${HOME}/.config/deluge`) to be re-used at container restart. Important files in there:
+Configuration gets stored automatically in your mounted volume (`${ROOT}/config/deluge`) to be re-used at container restart. Important files in there:
 
 - `auth` contains your login/password
 - `core.conf` contains your deluge configuration
@@ -260,7 +287,8 @@ I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 
 Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
-Copy the 3 files to `${HOME}/.vpn`.
+
+Copy the 3 files to `${ROOT}/config/vpn`.
 Create a 4th file `vpn.auth` with the following content:
 
 ```Text
@@ -268,7 +296,7 @@ Create a 4th file `vpn.auth` with the following content:
 <pia password>
 ```
 
-You should now have 3 files in `${HOME}/.vpn`:
+You should now have 3 files in `${ROOT}/config/vpn`:
 
 - netherlands.ovpn
 - vpn.auth
@@ -308,31 +336,35 @@ Then, rename `<country>.ovpn` to `vpn.conf`
 Put it in the docker-compose file, and make deluge use the vpn container network:
 
 ```yaml
-vpn:
+  vpn:
     container_name: vpn
     image: dperson/openvpn-client:latest
     cap_add:
       - net_admin # required to modify network interfaces
     restart: unless-stopped
     volumes:
-      - /dev/net/tun:/dev/net/tun # tun device
-      - ${HOME}/.vpn:/vpn # OpenVPN configuration
+      - /dev/net:/dev/net:z # tun device
+      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
+    security_opt:
+      - label:disable
     ports:
       - 8112:8112 # port for deluge web UI to be reachable from local network
     command: '-r 192.168.1.0/24' # route local network traffic
 
- deluge:
+  deluge:
     container_name: deluge
-    image: linuxserver/deluge:102
-    restart: unless-stopped
+    image: linuxserver/deluge:latest
+    restart: always
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
+      - PUID=${PUID} # default user id, defined in .env 
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - /media/${USER}/data1/downloads/deluge:/downloads # download folder
-      - ${HOME}/.config/deluge:/config # config files
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${ROOT}/config/deluge:/config # config files
+
+
 ```
 
 Notice how deluge is now using the vpn container network, with deluge web UI port exposed on the vpn container for local network access.
@@ -351,19 +383,19 @@ Get the torrent magnet link there, put it in Deluge, wait a bit, then you should
 No surprise: let's use linuxserver.io container !
 
 ```yaml
-jackett:
+  jackett:
     container_name: jackett
-    image: linuxserver/jackett:100
+    image: linuxserver/jackett:latest
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /media/${USER}/data1/downloads/ongoing/torrent-blackhole:/downloads # place where to put .torrent files
-      - ${HOME}/.config/jackett:/config # config files
+      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+      - ${ROOT}/config/jackett:/config # config files
 ```
 
 Nothing particular in this configuration, it's pretty similar to other linuxserver.io images.
@@ -392,18 +424,18 @@ You can now perform a manual search across multiple torrent indexers in a clean 
 Once again we'll use the Docker image from linuxserver and set it in a docker-compose file.
 
 ```yaml
-nzbget:
+  nzbget:
     container_name: nzbget
-    image: linuxserver/nzbget:101
+    image: linuxserver/nzbget:latest
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
-      - /media/${USER}/data1/downloads/nzbget:/downloads # download folder
-      - ${HOME}/.config/nzbget:/config # config files
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
+      - ${ROOT}/downloads:/downloads # download folder
+      - ${ROOT}/config/nzbget:/config # config files
 ```
 
 #### Configuration and usage
@@ -431,20 +463,18 @@ Luckily for us, Plex team already provides a maintained [Docker image for pms](h
 We'll use the host network directly, and run our container with the following configuration:
 
 ```yaml
-plex-server:
+  plex-server:
     container_name: plex-server
-    image: plexinc/pms-docker:1.10.1.4602-f54242b6b
+    image: plexinc/pms-docker:latest
     restart: unless-stopped
     environment:
-      - TZ=Europe/Paris # timezone
+      - TZ=${TZ} # timezone, defined in .env
     network_mode: host
     volumes:
-      - ${HOME}/.plex/db:/config # plex database
-      - ${HOME}/.plex/transcode:/transcode # temp transcoded files
-      - /media/${USER}/data1/downloads/complete:/data # media library
+      - ${ROOT}/config/plex/db:/config # plex database
+      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+      - ${ROOT}/complete:/data # media library
 ```
-
-It's important to set volumes correctly for configuration to be persisted.
 
 Let's run it !
 `docker-compose up -d`
@@ -512,20 +542,20 @@ Guess who made a nice Sonarr Docker image? Linuxserver.io !
 Let's go:
 
 ```yaml
-sonarr:
+  sonarr:
     container_name: sonarr
-    image: linuxserver/sonarr:109
+    image: linuxserver/sonarr:latest
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${HOME}/.config/sonarr:/config # config files
-      - /media/${USER}/data1/downloads/complete/Series:/tv # tv shows folder
-      - /media/${USER}/data1/downloads/deluge/complete:/downloads # deluge download folder
+      - ${ROOT}/config/sonarr:/config # config files
+      - ${ROOT}/complete/tv:/tv # tv shows folder
+      - ${ROOT}/downloads:/downloads # download folder
 ```
 
 `docker-compose up -d`
@@ -602,20 +632,20 @@ Radarr is a fork of Sonarr, made for movies instead of TV shows. For a good whil
 Radarr is *very* similar to Sonarr. You won't be surprised by this configuration.
 
 ```yaml
-radarr:
+  radarr:
     container_name: radarr
-    image: linuxserver/radarr:80
+    image: linuxserver/radarr:latest
     restart: unless-stopped
     network_mode: host
     environment:
-      - PUID=1000 # default user id, for downloaded files access rights
-      - PGID=1000 # default group id, for downloaded files access rights
-      - TZ=Europe/Paris # timezone
-    volumes:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${HOME}/.config/radarr:/config # config files
-      - /media/${USER}/data1/downloads/movies:/movies # movies folder
-      - /media/${USER}/data1/downloads/ongoing:/downloads # download folder
+      - ${ROOT}/config/radarr:/config # config files
+      - ${ROOT}/complete/movies:/movies # movies folder
+      - ${ROOT}/downloads:/downloads # download folder
 ```
 
 #### Configuration
