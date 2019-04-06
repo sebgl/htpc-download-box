@@ -12,10 +12,18 @@ services:
       - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
     security_opt:
       - label:disable
-    ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
+    expose:
+      - "8112"
     command: '-r 192.168.1.0/24' # route local network traffic
-
+    labels:
+      - "traefik.backend=vpn"
+      - "traefik.https.frontend.rule=Host:deluge.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:deluge.localhost"
+      - "traefik.port=8112"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoints=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
+ 
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
@@ -33,7 +41,8 @@ services:
     container_name: jackett
     image: linuxserver/jackett:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "9117"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -42,12 +51,21 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
-
+    labels:
+      - "traefik.backend=jackett"
+      - "traefik.https.frontend.rule=Host:jackett.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:jackett.localhost"
+      - "traefik.port=9117"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoints=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
+ 
   nzbget:
     container_name: nzbget
     image: linuxserver/nzbget:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "6789"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -55,12 +73,21 @@ services:
     volumes:
       - ${ROOT}/downloads:/downloads # download folder
       - ${ROOT}/config/nzbget:/config # config files
+    labels:
+      - "traefik.backend=nzbget"
+      - "traefik.https.frontend.rule=Host:nzbget.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:nzbget.localhost"
+      - "traefik.port=6789"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoints=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "8989"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -70,12 +97,21 @@ services:
       - ${ROOT}/config/sonarr:/config # config files
       - ${ROOT}/complete/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
+    labels:
+      - "traefik.backend=sonarr"
+      - "traefik.https.frontend.rule=Host:sonarr.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:sonarr.localhost"
+      - "traefik.port=8989"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoints=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
 
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "7878"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -85,6 +121,14 @@ services:
       - ${ROOT}/config/radarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
+    labels:
+      - "traefik.backend=radarr"
+      - "traefik.https.frontend.rule=Host:radarr.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:radarr.localhost"
+      - "traefik.port=7878"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoints=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
 
   plex-server:
     container_name: plex-server
@@ -97,3 +141,30 @@ services:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
       - ${ROOT}/complete:/data # media library
+
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    restart: always
+    command: --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
+             --docker --docker.domain=${DOMAIN} --docker.endpoint="unix:///var/run/docker.sock" \
+             --docker.watch=true --docker.exposedbydefault=false \
+             --entryPoints="Name:https Address::443 TLS" \
+             --acme=true --acme.entrypoint=https --acme.httpchallenge --acme.httpchallenge.entrypoint=http \
+             --acme.domains=${DOMAIN} --acme.email=${EMAIL} --acme.storage=acme.json \
+             --api
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${ROOT}/config/traefik/acme.json:/acme.json
+    labels:
+      - "traefik.backend=traefik"
+      - "traefik.https.frontend.rule=Host:traefik.${DOMAIN}"
+      - "traefik.local.frontend.rule=Host:traefik.localhost"
+      - "traefik.port=8080"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.entryPoint=https"
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}"
