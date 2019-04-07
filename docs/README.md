@@ -14,5 +14,3 @@ Some of the programs included:
 - NZBGet: An amazing usenet downloader.
 - Deluge: An amazing torrent client.
 - Jackett: Get access to hundreds of indexers, and organize them into one place.
-
-Visit the [docs](https://johnpyp.github.io/htpc-download-box)
