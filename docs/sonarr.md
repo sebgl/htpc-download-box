@@ -35,7 +35,7 @@ Sonarr web UI listens on port 8989 by default. You need to mount your tv shows d
 
 ## Configuration
 
-Sonarr should be available on `localhost:8989`. Go straight to the `Settings` tab.
+Sonarr should be available on `sonarr.localhost`. Go straight to the `Settings` tab.
 
 ![Sonarr settings](img/sonarr_settings.png)
 

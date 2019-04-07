@@ -35,7 +35,7 @@ As usual, run with `docker-compose up -d`.
 
 ## Configuration and usage
 
-Jackett web UI is available on port 9117.
+Jackett web UI is available at `jackett.localhost`.
 
 ![Jacket empty providers list](img/jackett_empty.png)
 

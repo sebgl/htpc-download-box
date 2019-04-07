@@ -24,7 +24,7 @@ To follow container logs, run `docker-compose logs -f deluge`.
 
 ## Configuration
 
-You should be able to login on the web UI (`localhost:8112`, replace `localhost` by your machine ip if needed).
+You should now be able to login at `deluge.localhost`.
 
 ![Deluge Login](img/deluge_login.png)
 

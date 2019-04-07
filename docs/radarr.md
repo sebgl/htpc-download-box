@@ -31,7 +31,7 @@ radarr:
 
 ## Configuration
 
-Radarr Web UI is available on port 7878.
+Radarr Web UI is available at `radarr.localhost`.
 Let's go straight to the `Settings` section.
 
 In `Media Management`, I chose to disable automatic movie renaming. Too bad, but it's helpful for Plex sub-zero plugin to find proper subtitles for the movie (ie. keep that `x264-720p-YIFY` tag to look for the right subtitle). I enable `Ignore Deleted Movies` to make sure movies that I delete won't be downloaded again by Radarr. I disable `Use Hardlinks instead of Copy` because I prefer to avoid messing around what's in my download area and what's in my movies area.

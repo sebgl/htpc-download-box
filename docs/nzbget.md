@@ -28,7 +28,9 @@ nzbget:
 ## Configuration and usage
 
 After running the container, web UI should be available on `nzbget.localhost`.
+
 Username: nzbget
+
 Password: tegbzn6789
 
 ![NZBGet](img/nzbget_empty.png)

@@ -55,3 +55,5 @@ These are the service names you'll need to make subdomain A records for that are
 Once these two steps are done, you should be able to run the containers with `docker-compose up -d` and your services will now be setup with basic auth on the domains you setup!
 
 They will also be available at `service_name.localhost` without needing to login and without https, so you can access them directly on your local network as you did in the base tutorial.
+
+Additionally, the Web Monitor UI for Traefik will be available at `traefik.localhost`.
