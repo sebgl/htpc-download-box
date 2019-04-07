@@ -6,50 +6,59 @@ TV shows and movies download, sort, with the desired quality and subtitles, behi
 All automated.
 
 ## Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [HTPC Download Box](#htpc-download-box)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-    - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
-    - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
-    - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
-    - [Organize libraries, fetch subtitles and play videos with Plex](#organize-libraries-fetch-subtitles-and-play-videos-with-plex)
-  - [Hardware configuration](#hardware-configuration)
-  - [Software stack](#software-stack)
-  - [Installation guide](#installation-guide)
-    - [Introduction](#introduction)
-    - [Install docker and docker-compose](#install-docker-and-docker-compose)
-    - [Setup Deluge](#setup-deluge)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-    - [Setup a VPN Container](#setup-a-vpn-container)
-      - [Introduction](#introduction)
-      - [privateinternetaccess.com custom setup](#privateinternetaccesscom-custom-setup)
-      - [Docker container](#docker-container)
-    - [Setup Jackett](#setup-jackett)
-      - [Docker container](#docker-container)
-      - [Configuration and usage](#configuration-and-usage)
-    - [Setup NZBGet](#setup-nzbget)
-      - [Docker container](#docker-container)
-      - [Configuration and usage](#configuration-and-usage)
-    - [Setup Plex](#setup-plex)
-      - [Media Server Docker Container](#media-server-docker-container)
-      - [Configuration](#configuration)
-      - [Download subtitles automatically with sub-zero](#download-subtitles-automatically-with-sub-zero)
-      - [Setup Plex clients](#setup-plex-clients)
-    - [Setup Sonarr](#setup-sonarr)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-      - [Give it a try](#give-it-a-try)
-    - [Setup Radarr](#setup-radarr)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-      - [Give it a try](#give-it-a-try)
-      - [Movie discovering](#movie-discovering)
-  - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
-  - [Going Further](#going-further)
 
-## Overview
+- [Table of Contents](#table-of-contents)
+- [Overview](#overview)
+  - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
+  - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
+  - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
+  - [Organize libraries, fetch subtitles and play videos with Plex](#organize-libraries-fetch-subtitles-and-play-videos-with-plex)
+- [Hardware configuration](#hardware-configuration)
+- [Software stack](#software-stack)
+- [Installation guide](#installation-guide)
+  - [Introduction](#introduction)
+  - [Install docker and docker-compose](#install-docker-and-docker-compose)
+  - [(optional) Use premade docker-compose](#optional-use-premade-docker-compose)
+  - [Setup environment variables](#setup-environment-variables)
+  - [Setup Reverse Proxy](#setup-reverse-proxy)
+    - [Docker Container](#docker-container)
+    - [Configuration](#configuration)
+  - [Setup Deluge](#setup-deluge)
+    - [Docker container](#docker-container)
+    - [Configuration](#configuration-1)
+  - [Setup a VPN Container](#setup-a-vpn-container)
+    - [Introduction](#introduction-1)
+    - [privateinternetaccess.com custom setup](#privateinternetaccesscom-custom-setup)
+    - [Docker container](#docker-container-1)
+  - [Setup Jackett](#setup-jackett)
+    - [Docker container](#docker-container-2)
+    - [Configuration and usage](#configuration-and-usage)
+  - [Setup NZBGet](#setup-nzbget)
+    - [Docker container](#docker-container-3)
+    - [Configuration and usage](#configuration-and-usage-1)
+  - [Setup Plex](#setup-plex)
+    - [Media Server Docker Container](#media-server-docker-container)
+    - [Configuration](#configuration-2)
+    - [Download subtitles automatically with sub-zero](#download-subtitles-automatically-with-sub-zero)
+    - [Setup Plex clients](#setup-plex-clients)
+  - [Setup Sonarr](#setup-sonarr)
+    - [Docker container](#docker-container-4)
+    - [Configuration](#configuration-3)
+    - [Give it a try](#give-it-a-try)
+  - [Setup Radarr](#setup-radarr)
+    - [Docker container](#docker-container-5)
+    - [Configuration](#configuration-4)
+    - [Give it a try](#give-it-a-try-1)
+    - [Movie discovering](#movie-discovering)
+- [Manage it all from your mobile](#manage-it-all-from-your-mobile)
+- [Going Further](#going-further)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Overview
 
 This is what I have set up at home to handle TV shows and movies automated download, sort and play.
 
@@ -173,9 +182,11 @@ Make sure it works fine:
 `docker run hello-world`
 
 Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
-### (optional) Use premade docker-compose
+### (Highly Recommended) Use premade docker-compose
 
 This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
+
+The docker-compose file is your best option for having a seamless experience with little manual editing of the configuration files.
 
 1. First, `git clone https://github.com/sebgl/htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
 2. Rename the `.env.example` file included in the repo to `.env`.
@@ -190,17 +201,85 @@ Here is an example of what your `.env` file should look like, use values that fi
 ```sh
 # Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 TZ=America/New_York
+# UNIX PUID and PGID, find with: id $USER
 PUID=1000
 PGID=1000
 # The directory where data and configuration will be stored.
 ROOT=/media/my_user/storage/homemedia
+##### The following variables are configuration for https and remote access. If you don't plan on doing this, leave these blank.
+DOMAIN=my_domain.com
+EMAIL=myemail@example.com
+# Go to http://www.htaccesstools.com/htpasswd-generator/ to generate a username:password_hash pair
+USERNAME=myusername
+PASSWORD=hash_of_htpasswd
 ```
 Things to notice:
 
 - TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 - The PUID and PGID are your user's ids. Find them with `id $USER`.
 - This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
+- The last 4 variables are reserved for if you are using https and remote access, don't fill them out if you don't plan on doing this. More information directly below.
+- The username and password are either side of a `username:password` output combination from http://www.htaccesstools.com/htpasswd-generator/. These credentials will be what are used for authenticating your services remotely.
+### Setup Reverse Proxy
 
+The "reverse proxy" is a way of unifying all of your docker containers under one port and domain. It will allow you to access services like `deluge` with `deluge.localhost` instead of `localhost:8112` for example.
+
+Additionally, the reverse proxy will allow you to access all of your services on a domain secured by https and authentication, from a domain like `deluge.my_domain.com`.
+
+#### Docker Container
+
+We'll use the Traefik docker image, a reverse proxy that is simple to configure and integrates perfectly with docker.
+
+```yaml
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    restart: always
+    command: --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
+             --docker --docker.domain=${DOMAIN} --docker.endpoint="unix:///var/run/docker.sock" \
+             --docker.watch=true --docker.exposedbydefault=false \
+             --api \
+             --entryPoints="Name:https Address::443 TLS" \
+             --acme=true --acme.entrypoint=https --acme.httpchallenge --acme.httpchallenge.entrypoint=http \
+             --acme.domains=${DOMAIN} --acme.email=${EMAIL} --acme.storage=acme.json
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${ROOT}/config/traefik/acme.json:/acme.json
+    labels:
+      - "traefik.backend=traefik"
+      - "traefik.local.frontend.rule=Host:traefik.localhost"
+      - "traefik.port=8080"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:traefik.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoint=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+```
+
+Things to note:
+
+- If you don't plan to remotely access your services, you'll need to remove 1) the last 3 lines after `--api \` and 2) delete every line that has a comment `# delete for no remote access`.
+
+#### Configuration
+
+To get https and remote access working, you'll need to:
+
+1. Portforward ports 80 and 443 from your computer, or open them on a server that you are running this on. Port forwarding is somewhat advanced, and it requires you to edit your router configuration. There are some great tutorials on doing this, and it *should* be relatively straight forward.
+
+2. Point your domain at your ip and these ports. First, you'll want to find you public ip (https://www.whatismyip.com). In your domain's DNS configuration, you'll need to make an `A` record for every service you want to be able to access remotely. This a record will be coming from a subdomain with the name of the service and pointing at your public ip address. For example, you would create an A record from deluge.my_domain.com to 123.12.34.56.
+
+These are the service names you'll need to make subdomain A records for that are covered in this tutorial:
+- deluge
+- nzbget
+- jackett
+- sonarr
+- radarr
+- traefik
+
+Once these two steps are done, you should be able to run the containers with `docker-compose up -d` and your services will now be setup with basic auth on the domains you setup! They will also be available at `service_name.localhost` without needing to login and without https, so you can access them directly on your local network.
 ### Setup Deluge
 
 #### Docker container
@@ -208,12 +287,10 @@ Things to notice:
 We'll use deluge Docker image from linuxserver, which runs both the deluge daemon and web UI in a single container.
 
 ```yaml
-version: '3'
-services:
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
-    restart: always
+    restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
       - PUID=${PUID} # default user id, defined in .env 
@@ -347,14 +424,22 @@ Put it in the docker-compose file, and make deluge use the vpn container network
       - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
     security_opt:
       - label:disable
-    ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
+    expose:
+      - "8112"
     command: '-r 192.168.1.0/24' # route local network traffic
-
+    labels:
+      - "traefik.backend=vpn"
+      - "traefik.local.frontend.rule=Host:deluge.localhost"
+      - "traefik.port=8112"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:deluge.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+ 
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
-    restart: always
+    restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
       - PUID=${PUID} # default user id, defined in .env 
@@ -363,8 +448,6 @@ Put it in the docker-compose file, and make deluge use the vpn container network
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
-
-
 ```
 
 Notice how deluge is now using the vpn container network, with deluge web UI port exposed on the vpn container for local network access.
@@ -387,7 +470,8 @@ No surprise: let's use linuxserver.io container !
     container_name: jackett
     image: linuxserver/jackett:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "9117"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -396,6 +480,15 @@ No surprise: let's use linuxserver.io container !
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
+    labels:
+      - "traefik.backend=jackett"
+      - "traefik.local.frontend.rule=Host:jackett.localhost"
+      - "traefik.port=9117"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:jackett.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+ 
 ```
 
 Nothing particular in this configuration, it's pretty similar to other linuxserver.io images.
@@ -428,14 +521,23 @@ Once again we'll use the Docker image from linuxserver and set it in a docker-co
     container_name: nzbget
     image: linuxserver/nzbget:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "6789"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
-     volumes:
+    volumes:
       - ${ROOT}/downloads:/downloads # download folder
       - ${ROOT}/config/nzbget:/config # config files
+    labels:
+      - "traefik.backend=nzbget"
+      - "traefik.local.frontend.rule=Host:nzbget.localhost"
+      - "traefik.port=6789"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:nzbget.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
 ```
 
 #### Configuration and usage
@@ -542,20 +644,28 @@ Guess who made a nice Sonarr Docker image? Linuxserver.io !
 Let's go:
 
 ```yaml
-  sonarr:
-    container_name: sonarr
-    image: linuxserver/sonarr:latest
+  nzbget:
+    container_name: nzbget
+    image: linuxserver/nzbget:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "6789"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
-     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/config/sonarr:/config # config files
-      - ${ROOT}/complete/tv:/tv # tv shows folder
+    volumes:
       - ${ROOT}/downloads:/downloads # download folder
+      - ${ROOT}/config/nzbget:/config # config files
+    labels:
+      - "traefik.backend=nzbget"
+      - "traefik.local.frontend.rule=Host:nzbget.localhost"
+      - "traefik.port=6789"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:nzbget.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+
 ```
 
 `docker-compose up -d`
@@ -636,16 +746,26 @@ Radarr is *very* similar to Sonarr. You won't be surprised by this configuration
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
-    network_mode: host
+    expose:
+      - "7878"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
-     volumes:
+    volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/config/radarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
+    labels:
+      - "traefik.backend=radarr"
+      - "traefik.local.frontend.rule=Host:radarr.localhost"
+      - "traefik.port=7878"
+      - "traefik.enable=true"
+      - "traefik.https.frontend.rule=Host:radarr.${DOMAIN}" # delete for no remote access
+      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
+      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+
 ```
 
 #### Configuration
