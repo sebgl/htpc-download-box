@@ -1,9 +1,3 @@
-*
-
-# But not these files...
-!./.gitignore
-!./.env.example
-!./README.md
-!./img
-!./docker-compose.yml
+**/.env
+data
 
