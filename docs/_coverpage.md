@@ -1,6 +1,6 @@
 # htpc download box
 
-> Ultimate self-contained home media server setup
+> Placeholder tagline
 
 - Only depends on docker
 - Easily extensible
