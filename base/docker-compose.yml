@@ -1,6 +1,5 @@
 version: '3.4'
 services:
-
   vpn:
     container_name: vpn
     image: dperson/openvpn-client:latest
@@ -12,22 +11,22 @@ services:
       - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
     security_opt:
       - label:disable
-    expose:
-      - "8112"
+    ports:
+      - 8112:8112 # port for deluge web UI to be reachable from local network
     command: '-r 192.168.1.0/24' # route local network traffic
     labels:
-      - "traefik.backend=vpn"
-      - "traefik.local.frontend.rule=Host:deluge.localhost"
-      - "traefik.port=8112"
-      - "traefik.enable=true"
- 
+      - 'traefik.backend=vpn'
+      - 'traefik.local.frontend.rule=Host:deluge.localhost'
+      - 'traefik.port=8112'
+      - 'traefik.enable=true'
+
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
     restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=${PUID} # default user id, defined in .env 
+      - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
     volumes:
@@ -38,8 +37,8 @@ services:
     container_name: jackett
     image: linuxserver/jackett:latest
     restart: unless-stopped
-    expose:
-      - "9117"
+    ports:
+      - 9117:9117
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -49,17 +48,17 @@ services:
       - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
     labels:
-      - "traefik.backend=jackett"
-      - "traefik.local.frontend.rule=Host:jackett.localhost"
-      - "traefik.port=9117"
-      - "traefik.enable=true"
- 
+      - 'traefik.backend=jackett'
+      - 'traefik.local.frontend.rule=Host:jackett.localhost'
+      - 'traefik.port=9117'
+      - 'traefik.enable=true'
+
   nzbget:
     container_name: nzbget
     image: linuxserver/nzbget:latest
     restart: unless-stopped
-    expose:
-      - "6789"
+    ports:
+      - 6789:6789
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -68,17 +67,17 @@ services:
       - ${ROOT}/downloads:/downloads # download folder
       - ${ROOT}/config/nzbget:/config # config files
     labels:
-      - "traefik.backend=nzbget"
-      - "traefik.local.frontend.rule=Host:nzbget.localhost"
-      - "traefik.port=6789"
-      - "traefik.enable=true"
+      - 'traefik.backend=nzbget'
+      - 'traefik.local.frontend.rule=Host:nzbget.localhost'
+      - 'traefik.port=6789'
+      - 'traefik.enable=true'
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
-    expose:
-      - "8989"
+    ports:
+      - 8989:8989
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -89,17 +88,17 @@ services:
       - ${ROOT}/complete/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
     labels:
-      - "traefik.backend=sonarr"
-      - "traefik.local.frontend.rule=Host:sonarr.localhost"
-      - "traefik.port=8989"
-      - "traefik.enable=true"
+      - 'traefik.backend=sonarr'
+      - 'traefik.local.frontend.rule=Host:sonarr.localhost'
+      - 'traefik.port=8989'
+      - 'traefik.enable=true'
 
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
-    expose:
-      - "7878"
+    ports:
+      - 7878:7878
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -110,10 +109,10 @@ services:
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
     labels:
-      - "traefik.backend=radarr"
-      - "traefik.local.frontend.rule=Host:radarr.localhost"
-      - "traefik.port=7878"
-      - "traefik.enable=true"
+      - 'traefik.backend=radarr'
+      - 'traefik.local.frontend.rule=Host:radarr.localhost'
+      - 'traefik.port=7878'
+      - 'traefik.enable=true'
 
   plex-server:
     container_name: plex-server
@@ -121,7 +120,7 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${TZ} # timezone, defined in .env
-    network_mode: host
+    network_mode: host # access on port 32400
     volumes:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
@@ -131,10 +130,11 @@ services:
     container_name: traefik
     image: traefik:latest
     restart: always
-    command: --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
-             --docker --docker.endpoint="unix:///var/run/docker.sock" \
-             --docker.watch=true --docker.exposedbydefault=false \
-             --api
+    command:
+      --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
+      --docker --docker.endpoint="unix:///var/run/docker.sock" \
+      --docker.watch=true --docker.exposedbydefault=false \
+      --api
     ports:
       - 80:80
       - 443:443
@@ -143,7 +143,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${ROOT}/config/traefik/acme.json:/acme.json
     labels:
-      - "traefik.backend=traefik"
-      - "traefik.local.frontend.rule=Host:traefik.localhost"
-      - "traefik.port=8080"
-      - "traefik.enable=true"
+      - 'traefik.backend=traefik'
+      - 'traefik.local.frontend.rule=Host:traefik.localhost'
+      - 'traefik.port=8080'
+      - 'traefik.enable=true'

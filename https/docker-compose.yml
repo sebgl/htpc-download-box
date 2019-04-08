@@ -1,6 +1,5 @@
 version: '3.4'
 services:
-
   vpn:
     container_name: vpn
     image: dperson/openvpn-client:latest
@@ -12,25 +11,25 @@ services:
       - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
     security_opt:
       - label:disable
-    expose:
-      - "8112"
+    ports:
+      - 8112:8112
     command: '-r 192.168.1.0/24' # route local network traffic
     labels:
-      - "traefik.backend=vpn"
-      - "traefik.local.frontend.rule=Host:deluge.localhost"
-      - "traefik.port=8112"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:deluge.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
- 
+      - 'traefik.backend=vpn'
+      - 'traefik.local.frontend.rule=Host:deluge.localhost'
+      - 'traefik.port=8112'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:deluge.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoints=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
+
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
     restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=${PUID} # default user id, defined in .env 
+      - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
     volumes:
@@ -41,8 +40,8 @@ services:
     container_name: jackett
     image: linuxserver/jackett:latest
     restart: unless-stopped
-    expose:
-      - "9117"
+    ports:
+      - 9117:9117
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -52,20 +51,20 @@ services:
       - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
     labels:
-      - "traefik.backend=jackett"
-      - "traefik.local.frontend.rule=Host:jackett.localhost"
-      - "traefik.port=9117"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:jackett.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
- 
+      - 'traefik.backend=jackett'
+      - 'traefik.local.frontend.rule=Host:jackett.localhost'
+      - 'traefik.port=9117'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:jackett.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoints=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
+
   nzbget:
     container_name: nzbget
     image: linuxserver/nzbget:latest
     restart: unless-stopped
-    expose:
-      - "6789"
+    ports:
+      - 6789:6789
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -74,20 +73,20 @@ services:
       - ${ROOT}/downloads:/downloads # download folder
       - ${ROOT}/config/nzbget:/config # config files
     labels:
-      - "traefik.backend=nzbget"
-      - "traefik.local.frontend.rule=Host:nzbget.localhost"
-      - "traefik.port=6789"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:nzbget.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+      - 'traefik.backend=nzbget'
+      - 'traefik.local.frontend.rule=Host:nzbget.localhost'
+      - 'traefik.port=6789'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:nzbget.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoints=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
     restart: unless-stopped
-    expose:
-      - "8989"
+    ports:
+      - 8989:8989
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -98,20 +97,20 @@ services:
       - ${ROOT}/complete/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
     labels:
-      - "traefik.backend=sonarr"
-      - "traefik.local.frontend.rule=Host:sonarr.localhost"
-      - "traefik.port=8989"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:sonarr.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+      - 'traefik.backend=sonarr'
+      - 'traefik.local.frontend.rule=Host:sonarr.localhost'
+      - 'traefik.port=8989'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:sonarr.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoints=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
 
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
     restart: unless-stopped
-    expose:
-      - "7878"
+    ports:
+      - 7878:7878
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -122,13 +121,13 @@ services:
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
     labels:
-      - "traefik.backend=radarr"
-      - "traefik.local.frontend.rule=Host:radarr.localhost"
-      - "traefik.port=7878"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:radarr.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoints=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+      - 'traefik.backend=radarr'
+      - 'traefik.local.frontend.rule=Host:radarr.localhost'
+      - 'traefik.port=7878'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:radarr.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoints=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
 
   plex-server:
     container_name: plex-server
@@ -136,7 +135,7 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${TZ} # timezone, defined in .env
-    network_mode: host
+    network_mode: host # access on port 32400
     volumes:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
@@ -146,13 +145,14 @@ services:
     container_name: traefik
     image: traefik:latest
     restart: always
-    command: --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
-             --docker --docker.domain=${DOMAIN} --docker.endpoint="unix:///var/run/docker.sock" \
-             --docker.watch=true --docker.exposedbydefault=false \
-             --api \
-             --entryPoints="Name:https Address::443 TLS" \
-             --acme=true --acme.entrypoint=https --acme.httpchallenge --acme.httpchallenge.entrypoint=http \
-             --acme.domains=${DOMAIN} --acme.email=${EMAIL} --acme.storage=acme.json
+    command:
+      --logLevel=info --entryPoints="Name:http Address::80" --defaultEntryPoints=https,http \
+      --docker --docker.domain=${DOMAIN} --docker.endpoint="unix:///var/run/docker.sock" \
+      --docker.watch=true --docker.exposedbydefault=false \
+      --api \
+      --entryPoints="Name:https Address::443 TLS" \
+      --acme=true --acme.entrypoint=https --acme.httpchallenge --acme.httpchallenge.entrypoint=http \
+      --acme.domains=${DOMAIN} --acme.email=${EMAIL} --acme.storage=acme.json
     ports:
       - 80:80
       - 443:443
@@ -161,10 +161,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${ROOT}/config/traefik/acme.json:/acme.json
     labels:
-      - "traefik.backend=traefik"
-      - "traefik.local.frontend.rule=Host:traefik.localhost"
-      - "traefik.port=8080"
-      - "traefik.enable=true"
-      - "traefik.https.frontend.rule=Host:traefik.${DOMAIN}" # delete for no remote access
-      - "traefik.https.frontend.entryPoint=https" # delete for no remote access
-      - "traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}" # delete for no remote access
+      - 'traefik.backend=traefik'
+      - 'traefik.local.frontend.rule=Host:traefik.localhost'
+      - 'traefik.port=8080'
+      - 'traefik.enable=true'
+      - 'traefik.https.frontend.rule=Host:traefik.${DOMAIN}' # delete for no remote access
+      - 'traefik.https.frontend.entryPoint=https' # delete for no remote access
+      - 'traefik.https.frontend.auth.basic.users=${USERNAME}:${PASSWORD}' # delete for no remote access
