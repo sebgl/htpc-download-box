@@ -86,8 +86,8 @@ vpn:
     - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
   security_opt:
     - label:disable
-  expose:
-    - '8112'
+  ports:
+    - 8112:8112 # port for deluge web UI to be reachable from local network
   command: '-r 192.168.1.0/24' # route local network traffic
   labels:
     - 'traefik.backend=vpn'

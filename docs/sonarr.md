@@ -11,8 +11,8 @@ sonarr:
   container_name: sonarr
   image: linuxserver/sonarr:latest
   restart: unless-stopped
-  expose:
-    - '8989'
+  ports:
+    - 8989:8989
   environment:
     - PUID=${PUID} # default user id, defined in .env
     - PGID=${PGID} # default group id, defined in .env

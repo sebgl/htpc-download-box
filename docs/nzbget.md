@@ -9,8 +9,8 @@ nzbget:
   container_name: nzbget
   image: linuxserver/nzbget:latest
   restart: unless-stopped
-  expose:
-    - '6789'
+  ports:
+    - 6789:6789
   environment:
     - PUID=${PUID} # default user id, defined in .env
     - PGID=${PGID} # default group id, defined in .env

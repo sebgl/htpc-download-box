@@ -11,8 +11,8 @@ radarr:
   container_name: radarr
   image: linuxserver/radarr:latest
   restart: unless-stopped
-  expose:
-    - '7878'
+  ports:
+    - 7878:7878
   environment:
     - PUID=${PUID} # default user id, defined in .env
     - PGID=${PGID} # default group id, defined in .env

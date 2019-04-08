@@ -11,8 +11,8 @@ jackett:
   container_name: jackett
   image: linuxserver/jackett:latest
   restart: unless-stopped
-  expose:
-    - '9117'
+  ports:
+    - 9117:9117
   environment:
     - PUID=${PUID} # default user id, defined in .env
     - PGID=${PGID} # default group id, defined in .env
