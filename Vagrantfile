@@ -7,6 +7,7 @@ chown -R vagrant:vagrant /media
 systemctl enable docker && systemctl start docker
 chown -R vagrant:vagrant htpc-download-box
 cd htpc-download-box
+cp .env.example .env
 docker-compose up -d
 SCRIPT
 
