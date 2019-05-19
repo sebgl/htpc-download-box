@@ -217,6 +217,8 @@ Things to notice:
 
 #### Docker container
 
+Uncomment container instructions in `docker.compose.yml`
+
 We'll use transmission Docker image from linuxserver, which runs both the transmission daemon and web UI in a single container.
 
 ```yaml
@@ -285,6 +287,8 @@ This must come up with some safety features:
 
 #### Docker container
 
+Uncomment container instructions in `docker.compose.yml`
+
 Put it in the docker-compose file, and make transmission use the vpn container network:
 
 ```yaml
@@ -336,9 +340,13 @@ Get the torrent magnet link there, put it in Transmission, wait a bit, then you 
 
 ### Setup NZBGet
 
+Uncomment container instructions in `docker.compose.yml`
+
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-nzbget)
 
 ### Setup Plex
+
+Uncomment container instructions in `docker.compose.yml`
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
 
