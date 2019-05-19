@@ -266,6 +266,8 @@ Uncomment container instructions in `docker.compose.yml`
 
 ### Setup Plex
 
+Uncomment container instructions in `docker.compose.yml`
+
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
 
 ### Setup Sonarr

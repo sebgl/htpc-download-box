@@ -91,14 +91,14 @@ services:
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
 
-  plex-server:
-    container_name: plex-server
-    image: plexinc/pms-docker:latest
-    restart: unless-stopped
-    environment:
-      - TZ=${TZ} # timezone, defined in .env
-    network_mode: host
-    volumes:
-      - ${ROOT}/config/plex/db:/config # plex database
-      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete:/data # media library
+#  plex-server:
+#    container_name: plex-server
+#    image: plexinc/pms-docker:latest
+#    restart: unless-stopped
+#    environment:
+#      - TZ=${TZ} # timezone, defined in .env
+#    network_mode: host
+#    volumes:
+#      - ${ROOT}/config/plex/db:/config # plex database
+#      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+#      - ${ROOT}/complete:/data # media library
