@@ -1,33 +1,38 @@
-version: '3.4'
+version: "3.4"
 services:
-
   vpn:
     container_name: vpn
-    image: dperson/openvpn-client:latest
+    image: bubuntux/nordvpn:latest
     cap_add:
       - net_admin # required to modify network interfaces
     restart: unless-stopped
-    volumes:
-      - /dev/net:/dev/net:z # tun device
-      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
-    security_opt:
-      - label:disable
+    devices:
+      - /dev/net/tun
+    environment:
+      - USER=${VPN_USER} # vpn user, defined in .env
+      - PASS=${VPN_PASSWORD} # vpn password, defined in .env
+      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+      - PROTOCOL=UDP
+      - CATEGORY=P2P
+      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
+      - TZ=${TZ} # timezone, defined in .env
     ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
+      - 9091:9091 # Transmission web UI
+      - 51413:51413 # Transmission bittorrent daemon
+      - 51413:51413/udp # Transmission bittorrent daemon
 
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
     restart: unless-stopped
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=${PUID} # default user id, defined in .env 
+      - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/deluge:/config # config files
+      - ${ROOT}/config/transmission:/config # config files
 
   jackett:
     container_name: jackett

@@ -1,6 +1,13 @@
-# HTPC Download Box
+# Pie HTPC Download Box
 
-Sonarr / Radarr / Jackett / NZBGet / Deluge / OpenVPN / Plex
+## **WIP**
+
+- Wasn't able to access transmission Web UI
+
+<br>
+<br>
+
+Sonarr / Radarr / Jackett / NZBGet / Transmission / NordVPN / Plex
 
 TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), ready to watch, in a beautiful media player.
 All automated.
@@ -19,7 +26,7 @@ All automated.
   - [Installation guide](#installation-guide)
     - [Introduction](#introduction)
     - [Install docker and docker-compose](#install-docker-and-docker-compose)
-    - [Setup Deluge](#setup-deluge)
+    - [Setup Transmission](#setup-transmission)
       - [Docker container](#docker-container)
       - [Configuration](#configuration)
     - [Setup a VPN Container](#setup-a-vpn-container)
@@ -53,7 +60,7 @@ All automated.
 
 This is what I have set up at home to handle TV shows and movies automated download, sort and play.
 
-*Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only.*
+_Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only._
 
 How does it work? I rely on several tools integrated together. They're all open-source, and deployed as Docker containers on my Linux server.
 
@@ -81,7 +88,7 @@ Sonarr and Radarr can both rely on two different ways to download files:
 
 I'm using both systems simultaneously, torrents being used only when a release is not found on newsgroups, or when the server is down. At some point I might switch to torrents only, which work really fine as well.
 
-Files are searched automatically by Sonarr/Radarr through a list of  *indexers* that you have to configure. Indexers are APIs that allow searching for particular releases organized by categories. Think browsing the Pirate Bay programmatically. This is a pretty common feature for newsgroups indexers that respect a common API (called `Newznab`).
+Files are searched automatically by Sonarr/Radarr through a list of _indexers_ that you have to configure. Indexers are APIs that allow searching for particular releases organized by categories. Think browsing the Pirate Bay programmatically. This is a pretty common feature for newsgroups indexers that respect a common API (called `Newznab`).
 However this common protocol does not really exist for torrent indexers. That's why we'll be using another tool called [Jackett](https://github.com/Jackett/Jackett). You can consider it as a local proxy API for the most popular torrent indexers. It searches and parse information from heterogeneous websites.
 
 ![Jackett indexers](img/jackett_indexers.png)
@@ -93,13 +100,13 @@ The best release matching your criteria is selected by Sonarr/Radarr (eg. non-bl
 Sonarr and Radarr are plugged to downloaders for our 2 different systems:
 
 - [NZBGet](https://nzbget.net/) handles Usenet (newsgroups) binary downloads.
-- [Deluge](http://deluge-torrent.org/) handles torrent download.
+- [Transmission](https://transmissionbt.com/) handles torrent download.
 
 Both are daemons coming with a nice Web UI, making them perfect candidates for being installed on a server. Sonarr & Radarr already have integration with them, meaning they rely on each service API to pass on downloads, request download status and handle finished downloads.
 
 Both are very standard and popular tools. I'm using them for their integration with Sonarr/Radarr but also as standalone downloaders for everything else.
 
-For security and anonymity reasons, I'm running Deluge behind a VPN connection. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
+For security and anonymity reasons, I'm running Transmission behind a VPN connection. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
 
 ### Organize libraries, fetch subtitles and play videos with Plex
 
@@ -139,7 +146,7 @@ You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The 
 
 **VPN**:
 
-- [OpenVPN](https://openvpn.net/) client configured with a [privateinternetaccess.com](https://www.privateinternetaccess.com/) access
+- [NordVPN](https://nordvpn.com)
 
 **Media Center**:
 
@@ -159,25 +166,29 @@ The stack is not really plug-and-play. You'll see that manual human configuratio
 
 Optional steps described below that you may wish to skip:
 
-- Using a VPN server for Deluge incoming/outgoing traffic.
+- Using a VPN server for Transmission incoming/outgoing traffic.
 - Using newsgroups (Usenet): you can skip NZBGet installation and all related Sonarr/Radarr indexers configuration if you wish to use bittorrent only.
 
 ### Install docker and docker-compose
 
-See the [official instructions](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce-1) to install Docker.
+```
+sudo apt update
+# install docker
+curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+sudo groupadd docker
+sudo gpasswd -a $USER docker
+newgrp docker
+# install docker-compose
+sudo apt install -y python python-pip
+sudo apt install libffi6 libffi-dev
+sudo pip install docker-compose
+```
 
-Then add yourself to the `docker` group:
-`sudo usermod -aG docker zao`
-
-Make sure it works fine:
-`docker run hello-world`
-
-Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
 ### (optional) Use premade docker-compose
 
 This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
 
-1. First, `git clone https://github.com/sebgl/htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
+1. First, `https://github.com/marchah/pie-htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
 2. Rename the `.env.example` file included in the repo to `.env`.
 3. Continue this guide, and the docker-compose file snippets you see are already ready for you to use. You'll still need to manually configure your `.env` file and other manual configurations.
 
@@ -195,45 +206,46 @@ PGID=1000
 # The directory where data and configuration will be stored.
 ROOT=/media/my_user/storage/homemedia
 ```
+
 Things to notice:
 
 - TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 - The PUID and PGID are your user's ids. Find them with `id $USER`.
 - This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
 
-### Setup Deluge
+### Setup Transmission
 
 #### Docker container
 
-We'll use deluge Docker image from linuxserver, which runs both the deluge daemon and web UI in a single container.
+We'll use transmission Docker image from linuxserver, which runs both the transmission daemon and web UI in a single container.
 
 ```yaml
-version: '3'
+version: "3"
 services:
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: always
-    network_mode: service:vpn # run on the vpn network
-    environment:
-      - PUID=${PUID} # default user id, defined in .env 
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/deluge:/config # config files
+  transmission:
+  image: linuxserver/transmission:latest
+  container_name: transmission
+  restart: unless-stopped
+  network_mode: service:vpn # run on the vpn network
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - ${ROOT}/downloads:/downloads # downloads folder
+    - ${ROOT}/config/transmission:/config # config files
 ```
 
 Things to notice:
 
-- I use the host network to simplify configuration. Important ports are `8112` (web UI) and `58846` (bittorrent daemon).
+- I use the host network to simplify configuration. Important ports are `9091` (web UI) and `51413` (bittorrent daemon).
 
 Then run the container with `docker-compose up -d`.
-To follow container logs, run `docker-compose logs -f deluge`.
+To follow container logs, run `docker-compose logs -f transmission`.
 
 #### Configuration
 
-You should be able to login on the web UI (`localhost:8112`, replace `localhost` by your machine ip if needed).
+You should be able to login on the web UI (`localhost:9091`, replace `localhost` by your machine ip if needed).
 
 ![Deluge Login](img/deluge_login.png)
 
@@ -263,114 +275,58 @@ You can use the Web UI manually to download any torrent from a .torrent file or 
 
 #### Introduction
 
-The goal here is to have an OpenVPN Client container running and always connected. We'll make Deluge incoming and outgoing traffic go through this OpenVPN container.
+The goal here is to have an NordVPN Client container running and always connected. We'll make Transmission incoming and outgoing traffic go through this NordVPN container.
 
 This must come up with some safety features:
 
 1. VPN connection should be restarted if not responsive
-1. Traffic should be allowed through the VPN tunnel *only*, no leaky outgoing connection if the VPN is down
-1. Deluge Web UI should still be reachable from the local network
-
-Lucky me, someone already [set that up quite nicely](https://github.com/dperson/openvpn-client).
-
-Point 1 is resolved through the OpenVPN configuration (`ping-restart` set to 120 sec by default).
-Point 2 is resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L52-L87)
-Point 3 is also resolved through [iptables rules](https://github.com/dperson/openvpn-client/blob/master/openvpn.sh#L104)
-
-Configuration is explained on the [project page](https://github.com/dperson/openvpn-client), you can follow it.
-However it is not that easy depending on your VPN server settings.
-I'm using a privateinternetaccess.com VPN, so here is how I set it up.
-
-#### privateinternetaccess.com custom setup
-
-*Note*: this section only applies for [PIA](https://privateinternetaccess.com) accounts.
-
-Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
-In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
-
-Copy the 3 files to `${ROOT}/config/vpn`.
-Create a 4th file `vpn.auth` with the following content:
-
-```Text
-<pia username>
-<pia password>
-```
-
-You should now have 3 files in `${ROOT}/config/vpn`:
-
-- netherlands.ovpn
-- vpn.auth
-- crl.rsa.2048.pem
-- ca.rsa.2048.crt
-
-Edit `netherlands.ovpn` (or any other country of your choice) to tweak a few things (see my comments on lines added or modified):
-
-```INI
-client
-dev tun
-proto udp
-remote nl.privateinternetaccess.com 1198
-resolv-retry infinite
-nobind
-persist-key
-# persist-tun # disable to completely reset vpn connection on failure
-cipher aes-128-cbc
-auth sha1
-tls-client
-remote-cert-tls server
-auth-user-pass /vpn/vpn.auth # to be reachable inside the container
-comp-lzo
-verb 1
-reneg-sec 0
-crl-verify /vpn/crl.rsa.2048.pem # to be reachable inside the container
-ca /vpn/ca.rsa.2048.crt # to be reachable inside the container
-disable-occ
-keepalive 10 30 # send a ping every 10 sec and reconnect after 30 sec of unsuccessfull pings
-pull-filter ignore "auth-token" # fix PIA reconnection auth error that may occur every 8 hours
-```
-
-Then, rename `<country>.ovpn` to `vpn.conf`
+1. Traffic should be allowed through the VPN tunnel _only_, no leaky outgoing connection if the VPN is down
+1. Transmission Web UI should still be reachable from the local network
 
 #### Docker container
 
-Put it in the docker-compose file, and make deluge use the vpn container network:
+Put it in the docker-compose file, and make transmission use the vpn container network:
 
 ```yaml
-  vpn:
-    container_name: vpn
-    image: dperson/openvpn-client:latest
-    cap_add:
-      - net_admin # required to modify network interfaces
-    restart: unless-stopped
-    volumes:
-      - /dev/net:/dev/net:z # tun device
-      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
-    security_opt:
-      - label:disable
-    ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-r 192.168.1.0/24' # route local network traffic
+vpn:
+  container_name: vpn
+  image: bubuntux/nordvpn:latest
+  cap_add:
+    - net_admin # required to modify network interfaces
+  restart: unless-stopped
+  devices:
+    - /dev/net/tun
+  environment:
+    - USER=${VPN_USER} # vpn user, defined in .env
+    - PASS=${VPN_PASSWORD} # vpn password, defined in .env
+    - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+    - PROTOCOL=UDP
+    - CATEGORY=P2P
+    - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
+    - TZ=${TZ} # timezone, defined in .env
+  ports:
+    - 9091:9091 # Transmission web UI
+    - 51413:51413 # Transmission bittorrent daemon
+    - 51413:51413/udp # Transmission bittorrent daemon
 
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: always
-    network_mode: service:vpn # run on the vpn network
-    environment:
-      - PUID=${PUID} # default user id, defined in .env 
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/deluge:/config # config files
-
-
+transmission:
+  image: linuxserver/transmission:latest
+  container_name: transmission
+  restart: unless-stopped
+  network_mode: service:vpn # run on the vpn network
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - ${ROOT}/downloads:/downloads # downloads folder
+    - ${ROOT}/config/transmission:/config # config files
 ```
 
-Notice how deluge is now using the vpn container network, with deluge web UI port exposed on the vpn container for local network access.
+Notice how transmission is now using the vpn container network, with transmission web UI port exposed on the vpn container for local network access.
 
-You can check that deluge is properly going out through the VPN IP by using [torguard check](https://torguard.net/checkmytorrentipaddress.php).
-Get the torrent magnet link there, put it in Deluge, wait a bit, then you should see your outgoing torrent IP on the website.
+You can check that transmission is properly going out through the VPN IP by using [torguard check](https://torguard.net/checkmytorrentipaddress.php).
+Get the torrent magnet link there, put it in Transmission, wait a bit, then you should see your outgoing torrent IP on the website.
 
 ![Torrent guard](img/torrent_guard.png)
 
@@ -383,19 +339,19 @@ Get the torrent magnet link there, put it in Deluge, wait a bit, then you should
 No surprise: let's use linuxserver.io container !
 
 ```yaml
-  jackett:
-    container_name: jackett
-    image: linuxserver/jackett:latest
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-      - ${ROOT}/config/jackett:/config # config files
+jackett:
+  container_name: jackett
+  image: linuxserver/jackett:latest
+  restart: unless-stopped
+  network_mode: host
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+    - ${ROOT}/config/jackett:/config # config files
 ```
 
 Nothing particular in this configuration, it's pretty similar to other linuxserver.io images.
@@ -463,17 +419,17 @@ Luckily for us, Plex team already provides a maintained [Docker image for pms](h
 We'll use the host network directly, and run our container with the following configuration:
 
 ```yaml
-  plex-server:
-    container_name: plex-server
-    image: plexinc/pms-docker:latest
-    restart: unless-stopped
-    environment:
-      - TZ=${TZ} # timezone, defined in .env
-    network_mode: host
-    volumes:
-      - ${ROOT}/config/plex/db:/config # plex database
-      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete:/data # media library
+plex-server:
+  container_name: plex-server
+  image: plexinc/pms-docker:latest
+  restart: unless-stopped
+  environment:
+    - TZ=${TZ} # timezone, defined in .env
+  network_mode: host
+  volumes:
+    - ${ROOT}/config/plex/db:/config # plex database
+    - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+    - ${ROOT}/complete:/data # media library
 ```
 
 Let's run it !
@@ -489,6 +445,7 @@ I have two libraries:
 - TV shows
 
 Make these the library paths:
+
 - Movies: `/data/movies`
 - TV: `/data/tv`
 
@@ -602,7 +559,7 @@ Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files.*
+_Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files._
 
 Enter the series name, then you can choose a few things:
 
@@ -629,7 +586,7 @@ Radarr is a fork of Sonarr, made for movies instead of TV shows. For a good whil
 
 #### Docker container
 
-Radarr is *very* similar to Sonarr. You won't be surprised by this configuration.
+Radarr is _very_ similar to Sonarr. You won't be surprised by this configuration.
 
 ```yaml
   radarr:
@@ -719,11 +676,11 @@ I disabled automatic sync for these lists: I want them to show when I add a new 
 ## Manage it all from your mobile
 
 On Android, I'm using [nzb360](http://nzb360.com) to manage NZBGet, Deluge, Sonarr and Radarr.
-It's a beautiful and well-thinked app. Easy to get a look at upcoming tv shows releases (eg. "when will the next f**cking Game of Thrones episode be released?").
+It's a beautiful and well-thinked app. Easy to get a look at upcoming tv shows releases (eg. "when will the next f\*\*cking Game of Thrones episode be released?").
 
 ![NZB360](img/nzb360.png)
 
-The free version does not allow you to add new shows. Consider switching to the paid version (6$) and support the developer.
+The free version does not allow you to add new shows. Consider switching to the paid version (6\$) and support the developer.
 
 ## Going Further
 
