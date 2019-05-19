@@ -247,7 +247,7 @@ You should be able to login on the web UI (`localhost:9091`, replace `localhost`
 
 ![Deluge Login](img/deluge_login.png)
 
-The default password is `deluge`. You are asked to modify it, I chose to set an empty one since deluge won't be accessible from outside my local network.
+The default password is `admin`. You are asked to modify it, I chose to set an empty one since transmission won't be accessible from outside my local network.
 
 The running deluge daemon should be automatically detected and appear as online, you can connect to it.
 
@@ -341,8 +341,6 @@ Uncomment container instructions in `docker.compose.yml`
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-nzbget)
 
 ### Setup Plex
-
-Uncomment container instructions in `docker.compose.yml`
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
 

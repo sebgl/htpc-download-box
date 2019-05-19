@@ -1,38 +1,38 @@
 version: "3.4"
 services:
-#  vpn:
-#    container_name: vpn
-#    image: bubuntux/nordvpn:latest
-#    cap_add:
-#      - net_admin # required to modify network interfaces
-#    restart: unless-stopped
-#    devices:
-#      - /dev/net/tun
-#    environment:
-#      - USER=${VPN_USER} # vpn user, defined in .env
-#      - PASS=${VPN_PASSWORD} # vpn password, defined in .env
-#      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
-#      - PROTOCOL=UDP
-#      - CATEGORY=P2P
-#      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
-#      - TZ=${TZ} # timezone, defined in .env
-#    ports:
-#      - 9091:9091 # Transmission web UI
-#      - 51413:51413 # Transmission bittorrent daemon
-#      - 51413:51413/udp # Transmission bittorrent daemon
+  #  vpn:
+  #    container_name: vpn
+  #    image: bubuntux/nordvpn:latest
+  #    cap_add:
+  #      - net_admin # required to modify network interfaces
+  #    restart: unless-stopped
+  #    devices:
+  #      - /dev/net/tun
+  #    environment:
+  #      - USER=${VPN_USER} # vpn user, defined in .env
+  #      - PASS=${VPN_PASSWORD} # vpn password, defined in .env
+  #      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+  #      - PROTOCOL=UDP
+  #      - CATEGORY=P2P
+  #      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
+  #      - TZ=${TZ} # timezone, defined in .env
+  #    ports:
+  #      - 9091:9091 # Transmission web UI
+  #      - 51413:51413 # Transmission bittorrent daemon
+  #      - 51413:51413/udp # Transmission bittorrent daemon
 
-#  transmission:
-#    image: linuxserver/transmission:latest
-#    container_name: transmission
-#    restart: unless-stopped
-#    network_mode: service:vpn # run on the vpn network
-#    environment:
-#      - PUID=${PUID} # default user id, defined in .env
-#      - PGID=${PGID} # default group id, defined in .env
-#      - TZ=${TZ} # timezone, defined in .env
-#    volumes:
-#      - ${ROOT}/downloads:/downloads # downloads folder
-#      - ${ROOT}/config/transmission:/config # config files
+  #  transmission:
+  #    image: linuxserver/transmission:latest
+  #    container_name: transmission
+  #    restart: unless-stopped
+  #    network_mode: service:vpn # run on the vpn network
+  #    environment:
+  #      - PUID=${PUID} # default user id, defined in .env
+  #      - PGID=${PGID} # default group id, defined in .env
+  #      - TZ=${TZ} # timezone, defined in .env
+  #    volumes:
+  #      - ${ROOT}/downloads:/downloads # downloads folder
+  #      - ${ROOT}/config/transmission:/config # config files
 
   jackett:
     container_name: jackett
@@ -48,18 +48,18 @@ services:
       - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
       - ${ROOT}/config/jackett:/config # config files
 
-#  nzbget:
-#    container_name: nzbget
-#    image: linuxserver/nzbget:latest
-#    restart: unless-stopped
-#    network_mode: host
-#    environment:
-#      - PUID=${PUID} # default user id, defined in .env
-#      - PGID=${PGID} # default group id, defined in .env
-#      - TZ=${TZ} # timezone, defined in .env
-#    volumes:
-#      - ${ROOT}/downloads:/downloads # download folder
-#      - ${ROOT}/config/nzbget:/config # config files
+  #  nzbget:
+  #    container_name: nzbget
+  #    image: linuxserver/nzbget:latest
+  #    restart: unless-stopped
+  #    network_mode: host
+  #    environment:
+  #      - PUID=${PUID} # default user id, defined in .env
+  #      - PGID=${PGID} # default group id, defined in .env
+  #      - TZ=${TZ} # timezone, defined in .env
+  #    volumes:
+  #      - ${ROOT}/downloads:/downloads # download folder
+  #      - ${ROOT}/config/nzbget:/config # config files
 
   sonarr:
     container_name: sonarr
@@ -91,14 +91,14 @@ services:
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
 
-#  plex-server:
-#    container_name: plex-server
-#    image: plexinc/pms-docker:latest
-#    restart: unless-stopped
-#    environment:
-#      - TZ=${TZ} # timezone, defined in .env
-#    network_mode: host
-#    volumes:
-#      - ${ROOT}/config/plex/db:/config # plex database
-#      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-#      - ${ROOT}/complete:/data # media library
+  plex-server:
+    container_name: plex-server
+    image: plexinc/pms-docker:latest
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ} # timezone, defined in .env
+    network_mode: host
+    volumes:
+      - ${ROOT}/config/plex/db:/config # plex database
+      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+      - ${ROOT}/complete:/data # media library
