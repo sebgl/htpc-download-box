@@ -268,6 +268,27 @@ Uncomment container instructions in `docker.compose.yml`
 
 Uncomment container instructions in `docker.compose.yml`
 
+Not working but didn't try to fix the issue:
+
+```
+plex-server    | 6 3000 /root/Library/Application Support
+plex-server    | 8192
+plex-server    | Error in command line:the argument for option '--serverUuid' should follow immediately after the equal sign
+plex-server    | Crash Uploader options (all are required):
+plex-server    |   --directory arg       Directory to scan for crash reports
+plex-server    |   --serverUuid arg      UUID of the server that crashed
+plex-server    |   --userId arg          User that owns this product
+plex-server    |   --platform arg        Platform string
+plex-server    |   --platformVersion arg Platform version string
+plex-server    |   --vendor arg          Vendor string
+plex-server    |   --device arg          Device string
+plex-server    |   --model arg           Device model string
+plex-server    |   --sentryUrl arg       Sentry URL to upload to
+plex-server    |   --sentryKey arg       Sentry Key for the project
+plex-server    |   --version arg         Version of the product
+
+```
+
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
 
 ### Setup Sonarr

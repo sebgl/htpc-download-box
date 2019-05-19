@@ -93,7 +93,7 @@ services:
 
 #  plex-server:
 #    container_name: plex-server
-#    image: plexinc/pms-docker:latest
+#    image: jaymoulin/plex:latest
 #    restart: unless-stopped
 #    environment:
 #      - TZ=${TZ} # timezone, defined in .env
