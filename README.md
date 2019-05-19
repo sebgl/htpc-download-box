@@ -123,11 +123,7 @@ The server has transcoding abilities: it automatically transcodes video quality 
 
 ## Hardware configuration
 
-I'm using an old [Proliant MicroServer N54L](http://www.minimachines.net/promos-et-sorties/bon-plan-un-micro-serveur-hp-proliant-4-emplacements-a-169e-371) (2 cores, 2.20GHz) that I tweaked a bit to have 6GB RAM, an additional graphic card for better Full HD decoding, and an additional 2TB disk for data.
-
-It has Ubuntu 17.10.1 with Docker installed.
-
-You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The stack should work fine on all these systems, but you'll have to adapt the Docker stack below to your OS. I'll only focus on a standard Linux installation here.
+Raspberry Pie 3 B
 
 ## Software stack
 
@@ -135,7 +131,7 @@ You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The 
 
 **Downloaders**:
 
-- [Deluge](http://deluge-torrent.org): torrent downloader with a web UI
+- [Transmission](https://transmissionbt.com/): torrent downloader with a web UI
 - [NZBGet](https://nzbget.net): usenet downloader with a web UI
 - [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
 
