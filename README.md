@@ -97,14 +97,22 @@ Optional steps described below that you may wish to skip:
 sudo apt update
 # install docker
 curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+# For old Pi like B+ (v1.2) you need to downgrade docker version
+# there is probably a more direct and better way to do it but didn't look for it
+# sudo apt install docker-ce=18.06.2~ce~3-0~raspbian
 sudo groupadd docker
 sudo gpasswd -a $USER docker
 newgrp docker
 # install docker-compose
-sudo apt install -y python python-pip
 sudo apt install libffi6 libffi-dev
+# For newer Pi like 3B
+sudo apt install -y python python-pip
 sudo pip install docker-compose
+# For older Pi like 1B+
+sudo apt install docker-compose
 ```
+
+Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works.
 
 ### (optional) Use premade docker-compose
 
