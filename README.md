@@ -2,7 +2,7 @@
 
 ## **WIP**
 
-- Wasn't able to access transmission Web UI
+- Wasn't able to access transmission Web UI using the vpn container
 
 <br>
 <br>
@@ -38,6 +38,11 @@ All automated.
     - [Setup Plex](#setup-plex)
     - [Setup Sonarr](#setup-sonarr)
     - [Setup Radarr](#setup-radarr)
+    - [Reduce Pi Power Consumption](#reduce-pi-power-consumption)
+      - [Disable HDMI](#disable-hdmi)
+      - [Turn Off LEDs](#turn-off-leds)
+      - [Disable Wifi](#disable-wifi)
+      - [Disable Bluetooth](#disable-bluetooth)
   - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
   - [Going Further](#going-further)
 
@@ -47,9 +52,11 @@ All automated.
 
 ## Hardware configuration
 
-I have a Synology DS2013j but it's too old to run sonarr/jackett/radarr/plex properly. It run the vpn and transmission on it to the docker-compose has been tested to work on a Pi.
+I have a Synology DS2013j but it's too old to run sonarr/jackett/radarr/plex properly. It run the vpn, transmission and plex on it.
 
-I use a Pi 3B but I have added the instructions for older Pi like the 1B and tested it. I'm just not using my Pi 1B because I'm afraid it won't be powerfull enough to do transcoding in the Plex server
+![Error](img/raspberry_pi_1b_failure.png)
+
+I use a Pi 3B but I have added the instructions for older Pi like the 1B and tested it but wasn't able to make it work.
 
 ## Software stack
 
@@ -113,6 +120,11 @@ sudo apt install docker-compose
 ```
 
 Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works.
+More infos:
+
+[Docker](https://github.com/moby/moby/issues/38175)
+
+[Docker Compose](https://withblue.ink/2017/12/31/yes-you-can-run-docker-on-raspbian.html)
 
 ### (optional) Use premade docker-compose
 
@@ -306,6 +318,57 @@ plex-server    |   --version arg         Version of the product
 ### Setup Radarr
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-radarr)
+
+## Reduce Pi Power Consumption
+
+### Disable HDMI
+
+1. Run `/usr/bin/tvservice -o`
+1. Add `/usr/bin/tvservice -o` in `/etc/rc.local` to disable HDMI on boot
+
+### Turn Off LEDs
+
+```
+# The line below is used to turn off the power LED
+sudo sh -c 'echo 0 > /sys/class/leds/led1/brightness'
+
+# The line below is used to turn off the action LED
+sudo sh -c 'echo 0 > /sys/class/leds/led0/brightness'
+```
+
+Add the following to the `/boot/config.txt`
+
+```
+# Disable Ethernet LEDs
+dtparam=eth_led0=14
+dtparam=eth_led1=14
+
+# Disable the PWR LED
+dtparam=pwr_led_trigger=none
+dtparam=pwr_led_activelow=off
+
+# Disable the Activity LED
+dtparam=act_led_trigger=none
+dtparam=act_led_activelow=off
+```
+
+### Disable Wifi
+
+Add the following to the `/boot/config.txt`
+
+```
+# Disable Wifi
+dtoverlay=pi3-disable-wifi
+```
+
+### Disable Bluetooth
+
+Add the following to the `/boot/config.txt`
+
+```
+# Disable Bluetooth
+dtoverlay=pi3-disable-bt
+```
 
 ## Manage it all from your mobile
 

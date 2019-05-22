@@ -17,6 +17,10 @@
 
 ## Mount NTFS file
 
+```
+mkdir /home/pi/Plex
+```
+
 Add in `/etc/fstab`
 
 ```
@@ -31,7 +35,13 @@ sudo mount -a
 
 (doesn't work when pi restart need to investigate)
 
-## Jackett indexers
+## Jackett
+
+### Manual download blackhole directory
+
+`/downloads/` (not sure if it's used)
+
+### Indexers
 
 1. 1337x
 1. cpasbien
@@ -55,9 +65,24 @@ https://forums.sonarr.tv/t/sonaar-not-moving-completed-downloads-to-tv-folder/13
 
 https://github.com/Sonarr/Sonarr/wiki/Completed-Download-Handling
 
+## Usefull Commands
+
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker rmi $(docker images -q)
+
+docker logs --tail 50 --follow --timestamps deluge
+docker exec -ti vpn bash
+
+curl ifconfig.me
+wget ifconfig.me
+```
+
 ## TODO
 
 1. Sonarr database is locked
 1. Next time rename `Plex` folder to `htpc`
 1. Next time rename transmission watch folder to `watch` instead of `torrent-blackhole`
-1. for `fstab` when diff with `auto,_netdev,nofaill`
+1. for `fstab` what's diff with `auto,_netdev,nofaill`
+1. SQLlite doesn't like been on a network folder, should be a local folder instead
