@@ -1,12 +1,5 @@
 # Pie HTPC Download Box
 
-## **WIP**
-
-- Wasn't able to access transmission Web UI using the vpn container
-
-<br>
-<br>
-
 Sonarr / Radarr / Jackett / NZBGet / Transmission / NordVPN / Plex
 
 TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), ready to watch, in a beautiful media player.
@@ -52,11 +45,11 @@ All automated.
 
 ## Hardware configuration
 
-I have a Synology DS2013j but it's too old to run sonarr/jackett/radarr/plex properly. It run the vpn, transmission and plex on it.
-
-![Error](img/raspberry_pi_1b_failure.png)
+I have a Synology DS2013j but it's too old to run sonarr/jackett/radarr/plex properly. The movies and tvshows will be stored in a NTFS folder on my nas, the softwares configurations will be stored in the PI. SQLlite doesn't like to be in a network folder, give a lot of `database locked` errors.
 
 I use a Pi 3B but I have added the instructions for older Pi like the 1B and tested it but wasn't able to make it work.
+
+![Error](img/raspberry_pi_1b_failure.png)
 
 ## Software stack
 
@@ -111,15 +104,15 @@ sudo groupadd docker
 sudo gpasswd -a $USER docker
 newgrp docker
 # install docker-compose
-sudo apt install libffi6 libffi-dev
+sudo apt install -y libffi6 libffi-dev
 # For newer Pi like 3B
 sudo apt install -y python python-pip
-sudo pip install docker-compose
+sudo pip install docker-compose # take a long time to run
 # For older Pi like 1B+
 sudo apt install docker-compose
 ```
 
-Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works.
+Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works (Nope need some investigations).
 More infos:
 
 [Docker](https://github.com/moby/moby/issues/38175)
@@ -140,13 +133,22 @@ For each of these images, there is some unique coniguration that needs to be don
 
 Here is an example of what your `.env` file should look like, use values that fit for your own setup.
 
+https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn
+
 ```sh
 # Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-TZ=America/New_York
+TZ=America/Los_Angeles
+# UNIX PUID and PGID, find with: id $USER
 PUID=1000
 PGID=1000
+# Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
+NETWORK=192.168.0.0/24
 # The directory where data and configuration will be stored.
 ROOT=/media/my_user/storage/homemedia
+#NordVPN informations
+VPN_USER=usero@email.com
+VPN_PASSWORD=password
+VPN_COUNTRY=CA
 ```
 
 Things to notice:
@@ -154,19 +156,17 @@ Things to notice:
 - TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 - The PUID and PGID are your user's ids. Find them with `id $USER`.
 - This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
+- You local network mask to make transmission accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
+- Your NordVPN password/login and VPN server country
 
 ### Setup Transmission
 
 #### Docker container
 
-Uncomment container instructions in `docker.compose.yml`
-
 We'll use transmission Docker image from linuxserver, which runs both the transmission daemon and web UI in a single container.
 
 ```yaml
-version: "3"
-services:
-  transmission:
+transmission:
   image: linuxserver/transmission:latest
   container_name: transmission
   restart: unless-stopped
@@ -227,8 +227,6 @@ This must come up with some safety features:
 
 #### Docker container
 
-Uncomment container instructions in `docker.compose.yml`
-
 Put it in the docker-compose file, and make transmission use the vpn container network:
 
 ```yaml
@@ -244,6 +242,7 @@ vpn:
     - USER=${VPN_USER} # vpn user, defined in .env
     - PASS=${VPN_PASSWORD} # vpn password, defined in .env
     - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+    - NETWORK=${NETWORK} # local network mask, defined in .env
     - PROTOCOL=UDP
     - CATEGORY=P2P
     - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180

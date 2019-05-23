@@ -1,38 +1,39 @@
 version: "3.4"
 services:
-  #  vpn:
-  #    container_name: vpn
-  #    image: bubuntux/nordvpn:latest
-  #    cap_add:
-  #      - net_admin # required to modify network interfaces
-  #    restart: unless-stopped
-  #    devices:
-  #      - /dev/net/tun
-  #    environment:
-  #      - USER=${VPN_USER} # vpn user, defined in .env
-  #      - PASS=${VPN_PASSWORD} # vpn password, defined in .env
-  #      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
-  #      - PROTOCOL=UDP
-  #      - CATEGORY=P2P
-  #      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
-  #      - TZ=${TZ} # timezone, defined in .env
-  #    ports:
-  #      - 9091:9091 # Transmission web UI
-  #      - 51413:51413 # Transmission bittorrent daemon
-  #      - 51413:51413/udp # Transmission bittorrent daemon
+  vpn:
+    container_name: vpn
+    image: bubuntux/nordvpn:latest
+    cap_add:
+      - net_admin # required to modify network interfaces
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun
+    environment:
+      - USER=${VPN_USER} # vpn user, defined in .env
+      - PASS=${VPN_PASSWORD} # vpn password, defined in .env
+      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+      - NETWORK=${NETWORK} # local network mask, defined in .env
+      - PROTOCOL=UDP
+      - CATEGORY=P2P
+      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
+      - TZ=${TZ} # timezone, defined in .env
+    ports:
+      - 9091:9091 # Transmission web UI
+      - 51413:51413 # Transmission bittorrent daemon
+      - 51413:51413/udp # Transmission bittorrent daemon
 
-  #  transmission:
-  #    image: linuxserver/transmission:latest
-  #    container_name: transmission
-  #    restart: unless-stopped
-  #    network_mode: service:vpn # run on the vpn network
-  #    environment:
-  #      - PUID=${PUID} # default user id, defined in .env
-  #      - PGID=${PGID} # default group id, defined in .env
-  #      - TZ=${TZ} # timezone, defined in .env
-  #    volumes:
-  #      - ${ROOT}/downloads:/downloads # downloads folder
-  #      - ${ROOT}/config/transmission:/config # config files
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    restart: unless-stopped
+    network_mode: service:vpn # run on the vpn network
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${ROOT}/config/transmission:/config # config files
 
   jackett:
     container_name: jackett
