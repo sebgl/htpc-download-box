@@ -19,12 +19,14 @@ All automated.
   - [Installation guide](#installation-guide)
     - [Introduction](#introduction)
     - [Install docker and docker-compose](#install-docker-and-docker-compose)
+    - [Setup NTFS folder](#setup-ntfs-folder)
+      - [Create NTFS folder on NAS](create-ntfs-folder-on-NAS)
+      - [Mount NTFS folder on Pi](mount-ntfs-folder-on-Pi)
     - [Setup Transmission](#setup-transmission)
       - [Docker container](#docker-container)
       - [Configuration](#configuration)
     - [Setup a VPN Container](#setup-a-vpn-container)
       - [Introduction](#introduction)
-      - [privateinternetaccess.com custom setup](#privateinternetaccesscom-custom-setup)
       - [Docker container](#docker-container)
     - [Setup Jackett](#setup-jackett)
     - [Setup NZBGet](#setup-nzbget)
@@ -38,6 +40,8 @@ All automated.
       - [Disable Bluetooth](#disable-bluetooth)
   - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
   - [Going Further](#going-further)
+  - [Usefull Commands](#usefull-commands)
+  - [TODO](#todo)
 
 ## Overview
 
@@ -109,7 +113,7 @@ sudo apt install -y libffi6 libffi-dev
 sudo apt install -y python python-pip
 sudo pip install docker-compose # take a long time to run
 # For older Pi like 1B+
-sudo apt install docker-compose
+# sudo apt install docker-compose
 ```
 
 Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works (Nope need some investigations).
@@ -160,6 +164,34 @@ Things to notice:
 - This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
 - You local network mask to make transmission accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
 - Your NordVPN password/login and VPN server country
+
+### Setup NAS
+
+#### Create NTFS folder on NAS
+
+This is the instructions for a Synology but should be pretty much the same for any NAS.
+
+[Instructions](https://www.synology.com/en-global/knowledgebase/DSM/tutorial/File_Sharing/How_to_access_files_on_Synology_NAS_within_the_local_network_NFS)
+
+#### Mount NTFS folder on Pi
+
+```
+mkdir /home/pi/Plex
+```
+
+Add in `/etc/fstab`
+
+```
+192.168.0.8:/volume1/Plex /home/pi/Plex nfs rw,hard,intr,rsize=8192,wsize=8192,timeo=14 0 0
+```
+
+Re mount
+
+```
+sudo mount -a
+```
+
+(doesn't work when pi restart need to investigate)
 
 ### Setup Transmission
 
@@ -277,6 +309,16 @@ Get the torrent magnet link there, put it in Transmission, wait a bit, then you 
 
 ### Setup Jackett
 
+#### Indexers
+
+1. 1337x
+1. cpasbien (always failed)
+1. RARBG
+1. The Pirate Bay
+1. LimeTorrents
+1. Torrent9
+1. Torrentz2
+
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-jackett)
 
 ### Setup NZBGet
@@ -297,14 +339,14 @@ Uncomment container instructions in `docker.compose.yml`
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-radarr)
 
-## Reduce Pi Power Consumption
+### Reduce Pi Power Consumption
 
-### Disable HDMI
+#### Disable HDMI
 
 1. Run `/usr/bin/tvservice -o`
 1. Add `/usr/bin/tvservice -o` in `/etc/rc.local` to disable HDMI on boot
 
-### Turn Off LEDs
+#### Turn Off LEDs
 
 ```
 # The line below is used to turn off the power LED
@@ -330,7 +372,7 @@ dtparam=act_led_trigger=none
 dtparam=act_led_activelow=off
 ```
 
-### Disable Wifi
+#### Disable Wifi
 
 Add the following to the `/boot/config.txt`
 
@@ -339,7 +381,7 @@ Add the following to the `/boot/config.txt`
 dtoverlay=pi3-disable-wifi
 ```
 
-### Disable Bluetooth
+#### Disable Bluetooth
 
 Add the following to the `/boot/config.txt`
 
@@ -355,3 +397,26 @@ dtoverlay=pi3-disable-bt
 ## Going Further
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#going-further)
+
+## Usefull Commands
+
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker rmi $(docker images -q)
+
+docker logs --tail 50 --follow --timestamps deluge
+docker exec -ti vpn bash
+
+curl ifconfig.me
+wget ifconfig.me
+```
+
+## TODO
+
+1. Transmission seed config back to default after restart
+1. Investigate why mount NTFS folder not working on startup (HDMI is off)
+1. `Reduce Power Consumption` not working on startup
+1. Transmission put completed download inside `complete/admin/torrent-folder-name`
+1. For `fstab` what's diff with `auto,_netdev,nofaill`
+1. Check why not working on Pi 1B+ (will never do it ...)
