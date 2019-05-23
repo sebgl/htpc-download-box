@@ -143,8 +143,10 @@ PUID=1000
 PGID=1000
 # Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
 NETWORK=192.168.0.0/24
-# The directory where data and configuration will be stored.
-ROOT=/media/my_user/storage/homemedia
+# The directory where downloading torrent and configuration will be stored.
+ROOT=/media/my_user/storage/htpc
+# The directory where movies and tvshows will be stored. usually network shared folder
+PLEX=/media/my_user/storage/homemedia
 #NordVPN informations
 VPN_USER=usero@email.com
 VPN_PASSWORD=password
@@ -284,29 +286,6 @@ Uncomment container instructions in `docker.compose.yml`
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-nzbget)
 
 ### Setup Plex
-
-Uncomment container instructions in `docker.compose.yml`
-
-Not working but didn't try to fix the issue:
-
-```
-plex-server    | 6 3000 /root/Library/Application Support
-plex-server    | 8192
-plex-server    | Error in command line:the argument for option '--serverUuid' should follow immediately after the equal sign
-plex-server    | Crash Uploader options (all are required):
-plex-server    |   --directory arg       Directory to scan for crash reports
-plex-server    |   --serverUuid arg      UUID of the server that crashed
-plex-server    |   --userId arg          User that owns this product
-plex-server    |   --platform arg        Platform string
-plex-server    |   --platformVersion arg Platform version string
-plex-server    |   --vendor arg          Vendor string
-plex-server    |   --device arg          Device string
-plex-server    |   --model arg           Device model string
-plex-server    |   --sentryUrl arg       Sentry URL to upload to
-plex-server    |   --sentryKey arg       Sentry Key for the project
-plex-server    |   --version arg         Version of the product
-
-```
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
 

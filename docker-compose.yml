@@ -74,7 +74,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/config/sonarr:/config # config files
-      - ${ROOT}/complete/tv:/tv # tv shows folder
+      - ${PLEX}/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
 
   radarr:
@@ -89,7 +89,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${ROOT}/config/radarr:/config # config files
-      - ${ROOT}/complete/movies:/movies # movies folder
+      - ${PLEX}/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
 
   plex-server:
@@ -106,5 +106,5 @@ services:
     volumes:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete/tv:/data/tvshows # tvshows library
-      - ${ROOT}/complete/movies:/data/movies # tvshows library
+      - ${PLEX}/tv:/data/tvshows # tvshows library
+      - ${PLEX}/movies:/data/movies # tvshows library
