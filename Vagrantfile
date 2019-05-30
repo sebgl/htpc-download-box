@@ -2,7 +2,6 @@ $script = <<-SCRIPT
 apt-get update
 apt-get install git docker docker-compose -y
 git clone https://github.com/sebgl/htpc-download-box.git
-mkdir /media
 chown -R vagrant:vagrant /media
 systemctl enable docker && systemctl start docker
 chown -R vagrant:vagrant htpc-download-box
