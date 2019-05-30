@@ -181,6 +181,16 @@ This tutorial will guide you along the full process of making your own docker-co
 2. Rename the `.env.example` file included in the repo to `.env`.
 3. Continue this guide, and the docker-compose file snippets you see are already ready for you to use. You'll still need to manually configure your `.env` file and other manual configurations.
 
+### (optional) Use premade Vagrant box
+
+You can also use a premade Vagrant box, that will spin up an Ubuntu virtual machine and bootstrap the environment from the `docker-compose` file described above.
+
+After ensuring Vagrant is installed on your machine:
+
+1. Run `vagrant up` to bootstrap the vagrant box
+2. Run `vagrant ssh` to ssh into the box
+3. Use the default `192.168.7.7` IP to access the box services from a local machine
+
 ### Setup environment variables
 
 For each of these images, there is some unique coniguration that needs to be done. Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
