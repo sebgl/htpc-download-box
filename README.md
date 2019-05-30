@@ -167,7 +167,7 @@ Optional steps described below that you may wish to skip:
 See the [official instructions](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce-1) to install Docker.
 
 Then add yourself to the `docker` group:
-`sudo usermod -aG docker zao`
+`sudo usermod -aG docker myuser`
 
 Make sure it works fine:
 `docker run hello-world`
