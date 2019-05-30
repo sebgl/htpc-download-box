@@ -173,6 +173,7 @@ Make sure it works fine:
 `docker run hello-world`
 
 Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
+
 ### (optional) Use premade docker-compose
 
 This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
@@ -489,6 +490,7 @@ I have two libraries:
 - TV shows
 
 Make these the library paths:
+
 - Movies: `/data/movies`
 - TV: `/data/tv`
 
