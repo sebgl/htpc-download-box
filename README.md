@@ -33,6 +33,7 @@ All automated.
     - [Setup Plex](#setup-plex)
     - [Setup Sonarr](#setup-sonarr)
     - [Setup Radarr](#setup-radarr)
+      - [Remotly Add Movies Using trakt.tv And List](#remotly-add-movies-using-trakt.tv-and-list)
     - [Reduce Pi Power Consumption](#reduce-pi-power-consumption)
       - [Disable HDMI](#disable-hdmi)
       - [Turn Off LEDs](#turn-off-leds)
@@ -338,6 +339,10 @@ Uncomment container instructions in `docker.compose.yml`
 ### Setup Radarr
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-radarr)
+
+#### Remotly Add Movies Using trakt.tv And List
+
+[Instructions](https://www.reddit.com/r/radarr/comments/aixb2i/how_to_setup_trakttv_for_lists/)
 
 ### Reduce Pi Power Consumption
 
