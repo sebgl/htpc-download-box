@@ -33,7 +33,7 @@ All automated.
     - [Setup Plex](#setup-plex)
     - [Setup Sonarr](#setup-sonarr)
     - [Setup Radarr](#setup-radarr)
-      - [Remotly Add Movies Using trakt.tv And List](#remotly-add-movies-using-trakt.tv-and-list)
+      - [Remotly Add Movies Using trakt.tv And List](#remotly-add-movies-using-trakttv-and-list)
     - [Reduce Pi Power Consumption](#reduce-pi-power-consumption)
       - [Disable HDMI](#disable-hdmi)
       - [Turn Off LEDs](#turn-off-leds)
