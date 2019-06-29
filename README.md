@@ -137,6 +137,7 @@ This tutorial will guide you along the full process of making your own docker-co
 For each of these images, there is some unique coniguration that needs to be done. Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
 
 Here is an example of what your `.env` file should look like, use values that fit for your own setup.
+SQLlite use by sonarr and radarr doesn't like to be on a network folder so I separated the config folders env variable to keep them in the Pi.
 
 https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn
 
@@ -148,10 +149,10 @@ PUID=1000
 PGID=1000
 # Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
 NETWORK=192.168.0.0/24
-# The directory where downloading torrent and configuration will be stored.
-ROOT=/media/my_user/storage/htpc
-# The directory where movies and tvshows will be stored. usually network shared folder
-PLEX=/media/my_user/storage/homemedia
+# The directory where data will be stored.
+ROOT=/media
+# The directory where data and configuration will be stored.
+CONFIG=/config
 #NordVPN informations
 VPN_USER=usero@email.com
 VPN_PASSWORD=password
@@ -211,8 +212,8 @@ transmission:
     - PGID=${PGID} # default group id, defined in .env
     - TZ=${TZ} # timezone, defined in .env
   volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${ROOT}/config/transmission:/config # config files
+    - ${HOME}/downloads:/downloads # downloads folder
+    - ${CONFIG}/config/transmission:/config # config files
 ```
 
 Things to notice:
@@ -239,7 +240,7 @@ You should activate `autoadd` in the plugins section: it adds supports for `.mag
 
 You can also tweak queue settings, defaults are fairly small. Also you can decide to stop seeding after a certain ratio is reached. That will be useful for Sonarr, since Sonarr can only remove finished downloads from deluge when the torrent has stopped seeding. Setting a very low ratio is not very fair though !
 
-Configuration gets stored automatically in your mounted volume (`${ROOT}/config/transmission`) to be re-used at container restart. Important files in there:
+Configuration gets stored automatically in your mounted volume (`${HOME}/config/transmission`) to be re-used at container restart. Important files in there:
 
 - `auth` contains your login/password
 - `core.conf` contains your deluge configuration
@@ -297,8 +298,8 @@ transmission:
     - PGID=${PGID} # default group id, defined in .env
     - TZ=${TZ} # timezone, defined in .env
   volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${ROOT}/config/transmission:/config # config files
+    - ${HOME}/downloads:/downloads # downloads folder
+    - ${CONFIG}/config/transmission:/config # config files
 ```
 
 Notice how transmission is now using the vpn container network, with transmission web UI port exposed on the vpn container for local network access.

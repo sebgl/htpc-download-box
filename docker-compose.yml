@@ -32,8 +32,8 @@ services:
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/transmission:/config # config files
+      - ${HOME}/downloads:/downloads # downloads folder
+      - ${CONFIG}/config/transmission:/config # config files
 
   jackett:
     container_name: jackett
@@ -46,8 +46,8 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-      - ${ROOT}/config/jackett:/config # config files
+      - ${HOME}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+      - ${CONFIG}/config/jackett:/config # config files
 
   #  nzbget:
   #    container_name: nzbget
@@ -59,8 +59,8 @@ services:
   #      - PGID=${PGID} # default group id, defined in .env
   #      - TZ=${TZ} # timezone, defined in .env
   #    volumes:
-  #      - ${ROOT}/downloads:/downloads # download folder
-  #      - ${ROOT}/config/nzbget:/config # config files
+  #      - ${HOME}/downloads:/downloads # download folder
+  #      - ${CONFIG}/config/nzbget:/config # config files
 
   sonarr:
     container_name: sonarr
@@ -73,9 +73,9 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/config/sonarr:/config # config files
-      - ${PLEX}/tv:/tv # tv shows folder
-      - ${ROOT}/downloads:/downloads # download folder
+      - ${CONFIG}/config/sonarr:/config # config files
+      - ${HOME}/tv:/tv # tv shows folder
+      - ${HOME}/downloads:/downloads # download folder
 
   radarr:
     container_name: radarr
@@ -88,9 +88,9 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/config/radarr:/config # config files
-      - ${PLEX}/movies:/movies # movies folder
-      - ${ROOT}/downloads:/downloads # download folder
+      - ${CONFIG}/config/radarr:/config # config files
+      - ${HOME}/movies:/movies # movies folder
+      - ${HOME}/downloads:/downloads # download folder
 
   plex-server:
     container_name: plex-server
@@ -104,7 +104,7 @@ services:
       - VERSION=docker
     network_mode: host
     volumes:
-      - ${ROOT}/config/plex/db:/config # plex database
-      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${PLEX}/tv:/data/tvshows # tvshows library
-      - ${PLEX}/movies:/data/movies # tvshows library
+      - ${CONFIG}/config/plex/db:/config # plex database
+      - ${CONFIG}/config/plex/transcode:/transcode # temp transcoded files
+      - ${HOME}/tv:/data/tvshows # tvshows library
+      - ${HOME}/movies:/data/movies # tvshows library
