@@ -1,4 +1,4 @@
-# Pie HTPC Download Box
+# Pi HTPC Download Box
 
 Sonarr / Radarr / Jackett / NZBGet / Transmission / NordVPN / Plex
 
@@ -7,7 +7,7 @@ All automated.
 
 ## Table of Contents
 
-- [HTPC Download Box](#htpc-download-box)
+- [Pi HTPC Download Box](#htpc-download-box)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
     - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
@@ -151,7 +151,7 @@ PGID=1000
 NETWORK=192.168.0.0/24
 # The directory where data will be stored.
 ROOT=/media
-# The directory where data and configuration will be stored.
+# The directory where configuration will be stored.
 CONFIG=/config
 #NordVPN informations
 VPN_USER=usero@email.com
