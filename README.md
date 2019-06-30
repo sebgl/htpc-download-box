@@ -212,7 +212,7 @@ transmission:
     - PGID=${PGID} # default group id, defined in .env
     - TZ=${TZ} # timezone, defined in .env
   volumes:
-    - ${HOME}/downloads:/downloads # downloads folder
+    - ${ROOT}/downloads:/downloads # downloads folder
     - ${CONFIG}/config/transmission:/config # config files
 ```
 
@@ -240,7 +240,7 @@ You should activate `autoadd` in the plugins section: it adds supports for `.mag
 
 You can also tweak queue settings, defaults are fairly small. Also you can decide to stop seeding after a certain ratio is reached. That will be useful for Sonarr, since Sonarr can only remove finished downloads from deluge when the torrent has stopped seeding. Setting a very low ratio is not very fair though !
 
-Configuration gets stored automatically in your mounted volume (`${HOME}/config/transmission`) to be re-used at container restart. Important files in there:
+Configuration gets stored automatically in your mounted volume (`${ROOT}/config/transmission`) to be re-used at container restart. Important files in there:
 
 - `auth` contains your login/password
 - `core.conf` contains your deluge configuration
@@ -298,7 +298,7 @@ transmission:
     - PGID=${PGID} # default group id, defined in .env
     - TZ=${TZ} # timezone, defined in .env
   volumes:
-    - ${HOME}/downloads:/downloads # downloads folder
+    - ${ROOT}/downloads:/downloads # downloads folder
     - ${CONFIG}/config/transmission:/config # config files
 ```
 
