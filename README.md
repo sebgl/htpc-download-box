@@ -421,7 +421,7 @@ wget ifconfig.me
 ## TODO
 
 1. When Pi restart the env variables are not set anymore and with the container auto restart it's create issues (downloaded works, did VPN was on?)
-1. Transmission seed config back to default after restart (seem to works now)
+1. Transmission seed config back to default after restart (seem to works now but not for `enable blocklist`)
 1. Investigate why mount NTFS folder not working on startup (HDMI is off)
 1. `Reduce Power Consumption` not working on startup
 1. Transmission put completed download inside `complete/admin/torrent-folder-name`
