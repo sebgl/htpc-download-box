@@ -1,4 +1,4 @@
-# Pie HTPC Download Box
+# Pi HTPC Download Box
 
 Sonarr / Radarr / Jackett / NZBGet / Transmission / NordVPN / Plex
 
