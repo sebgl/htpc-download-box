@@ -411,7 +411,7 @@ docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker rmi $(docker images -q)
 
-docker logs --tail 50 --follow --timestamps deluge
+docker logs --tail 50 --follow --timestamps transmission
 docker exec -ti vpn bash
 
 curl ifconfig.me
