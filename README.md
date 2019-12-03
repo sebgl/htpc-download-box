@@ -1,6 +1,6 @@
 # Pi HTPC Download Box
 
-Sonarr / Radarr / Jackett / NZBGet / Transmission / NordVPN / Plex
+Sonarr / Radarr / Bazarr / Jackett / NZBGet / Transmission / NordVPN / Plex
 
 TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), ready to watch, in a beautiful media player.
 All automated.
@@ -13,7 +13,6 @@ All automated.
     - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
     - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
     - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
-    - [Organize libraries, fetch subtitles and play videos with Plex](#organize-libraries-fetch-subtitles-and-play-videos-with-plex)
   - [Hardware configuration](#hardware-configuration)
   - [Software stack](#software-stack)
   - [Installation guide](#installation-guide)
@@ -33,6 +32,7 @@ All automated.
     - [Setup Plex](#setup-plex)
     - [Setup Sonarr](#setup-sonarr)
     - [Setup Radarr](#setup-radarr)
+    - [Setup Bazarr](#setup-bazarr)
       - [Remotly Add Movies Using trakt.tv And List](#remotly-add-movies-using-trakttv-and-list)
     - [Reduce Pi Power Consumption](#reduce-pi-power-consumption)
       - [Disable HDMI](#disable-hdmi)
@@ -78,7 +78,7 @@ I use a Pi 3B but I have added the instructions for older Pi like the 1B and tes
 **Media Center**:
 
 - [Plex](https://plex.tv): media center server with streaming transcoding features, useful plugins and a beautiful UI. Clients available for a lot of systems (Linux/OSX/Windows, Web, Android, Chromecast, Android TV, etc.)
-- [Sub-Zero](https://github.com/pannal/Sub-Zero.bundle): subtitle auto-download channel for Plex
+- [Bazarr](https://www.bazarr.media): manage TV show and movies subtitles
 
 ## Installation guide
 
@@ -344,6 +344,10 @@ Uncomment container instructions in `docker.compose.yml`
 #### Remotly Add Movies Using trakt.tv And List
 
 [Instructions](https://www.reddit.com/r/radarr/comments/aixb2i/how_to_setup_trakttv_for_lists/)
+
+### Setup Bazarr
+
+WIP
 
 ### Reduce Pi Power Consumption
 
