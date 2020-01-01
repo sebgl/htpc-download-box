@@ -418,6 +418,7 @@ curl ifconfig.me
 wget ifconfig.me
 
 ncdu # excellent command-line disk usage analyser
+df -h
 ```
 
 ## TODO
