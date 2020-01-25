@@ -225,7 +225,7 @@ services:
     container_name: deluge
     image: linuxserver/deluge:latest
     restart: always
-    network_mode: service:vpn # run on the vpn network
+    network_mode: host # run locally until the vpn network is set up
     environment:
       - PUID=${PUID} # default user id, defined in .env 
       - PGID=${PGID} # default group id, defined in .env
