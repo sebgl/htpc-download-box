@@ -492,7 +492,7 @@ Let's run it !
 
 #### Configuration
 
-Plex Web UI should be available at `localhost:32400` (replace `localhost` by your server ip if needed).
+Plex Web UI should be available at `localhost:32400/web` (replace `localhost` by your server ip if needed).
 You'll have to login first (registration is free), then Plex will ask you to add your libraries.
 I have two libraries:
 
