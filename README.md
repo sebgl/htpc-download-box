@@ -347,7 +347,7 @@ Uncomment container instructions in `docker.compose.yml`
 
 ### Setup Bazarr
 
-WIP
+[Instructions](https://github.com/morpheus65535/bazarr/wiki/Wizard-General)
 
 ### Reduce Pi Power Consumption
 
