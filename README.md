@@ -13,7 +13,7 @@ All automated.
     - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
     - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
     - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
-    - [Organize libraries, fetch subtitles and play videos with Plex](#organize-libraries-fetch-subtitles-and-play-videos-with-plex)
+    - [Organize libraries and play videos with Plex](#organize-libraries-and-play-videos-with-plex)
   - [Hardware configuration](#hardware-configuration)
   - [Software stack](#software-stack)
   - [Installation guide](#installation-guide)
@@ -35,7 +35,6 @@ All automated.
     - [Setup Plex](#setup-plex)
       - [Media Server Docker Container](#media-server-docker-container)
       - [Configuration](#configuration)
-      - [Download subtitles automatically with sub-zero](#download-subtitles-automatically-with-sub-zero)
       - [Setup Plex clients](#setup-plex-clients)
     - [Setup Sonarr](#setup-sonarr)
       - [Docker container](#docker-container)
@@ -46,6 +45,10 @@ All automated.
       - [Configuration](#configuration)
       - [Give it a try](#give-it-a-try)
       - [Movie discovering](#movie-discovering)
+    - [Setup Bazarr](#setup-bazarr)
+      - [Docker container](#docker-container)
+      - [Configuration](#configuration)
+      - [Give it a try](#give-it-a-try)
   - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
   - [Going Further](#going-further)
 
@@ -53,7 +56,7 @@ All automated.
 
 This is what I have set up at home to handle TV shows and movies automated download, sort and play.
 
-*Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only.*
+_Disclaimer: I'm not encouraging/supporting piracy, this is for information purpose only._
 
 How does it work? I rely on several tools integrated together. They're all open-source, and deployed as Docker containers on my Linux server.
 
@@ -81,7 +84,7 @@ Sonarr and Radarr can both rely on two different ways to download files:
 
 I'm using both systems simultaneously, torrents being used only when a release is not found on newsgroups, or when the server is down. At some point I might switch to torrents only, which work really fine as well.
 
-Files are searched automatically by Sonarr/Radarr through a list of  *indexers* that you have to configure. Indexers are APIs that allow searching for particular releases organized by categories. Think browsing the Pirate Bay programmatically. This is a pretty common feature for newsgroups indexers that respect a common API (called `Newznab`).
+Files are searched automatically by Sonarr/Radarr through a list of _indexers_ that you have to configure. Indexers are APIs that allow searching for particular releases organized by categories. Think browsing the Pirate Bay programmatically. This is a pretty common feature for newsgroups indexers that respect a common API (called `Newznab`).
 However this common protocol does not really exist for torrent indexers. That's why we'll be using another tool called [Jackett](https://github.com/Jackett/Jackett). You can consider it as a local proxy API for the most popular torrent indexers. It searches and parse information from heterogeneous websites.
 
 ![Jackett indexers](img/jackett_indexers.png)
@@ -101,10 +104,10 @@ Both are very standard and popular tools. I'm using them for their integration w
 
 For security and anonymity reasons, I'm running Deluge behind a VPN connection. All incoming/outgoing traffic from deluge is encrypted and goes out to an external VPN server. Other service stay on my local network. This is done through Docker networking stack (more to come on the next paragraphs).
 
-### Organize libraries, fetch subtitles and play videos with Plex
+### Organize libraries and play videos with Plex
 
 [Plex](https://www.plex.tv/) Media Server organize all your medias as libraries. You can set up one for TV shows and another one for movies.
-It automatically grabs metadata for each new release (description, actors, images, release date). A very nice feature that we'll use a lot is the [sub-zero plugin](https://github.com/pannal/Sub-Zero.bundle). Whenever a new video arrives in Plex library, sub-zero automatically searches and downloads the most appropriate subtitle from a list of subtitle providers, based on several criterias (release name, quality, popularity, etc).
+It automatically grabs metadata for each new release (description, actors, images, release date).
 
 ![Plex Web UI](img/plex_macbook.jpg)
 
@@ -131,6 +134,7 @@ You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The 
 - [Deluge](http://deluge-torrent.org): torrent downloader with a web UI
 - [NZBGet](https://nzbget.net): usenet downloader with a web UI
 - [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
+- [Bazarr](https://www.bazarr.media/): A companion tool for Radarr and Sonarr which will automatically pull subtitles for all of your TV and movie downloads.
 
 **Download orchestration**:
 
@@ -144,7 +148,6 @@ You can also use a Raspberry Pi, a Synology NAS, a Windows or Mac computer. The 
 **Media Center**:
 
 - [Plex](https://plex.tv): media center server with streaming transcoding features, useful plugins and a beautiful UI. Clients available for a lot of systems (Linux/OSX/Windows, Web, Android, Chromecast, Android TV, etc.)
-- [Sub-Zero](https://github.com/pannal/Sub-Zero.bundle): subtitle auto-download channel for Plex
 
 ## Installation guide
 
@@ -206,6 +209,7 @@ PGID=1000
 # The directory where data and configuration will be stored.
 ROOT=/media/my_user/storage/homemedia
 ```
+
 Things to notice:
 
 - TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
@@ -219,7 +223,7 @@ Things to notice:
 We'll use deluge Docker image from linuxserver, which runs both the deluge daemon and web UI in a single container.
 
 ```yaml
-version: '3'
+version: "3"
 services:
   deluge:
     container_name: deluge
@@ -227,7 +231,7 @@ services:
     restart: always
     network_mode: service:vpn # run on the vpn network
     environment:
-      - PUID=${PUID} # default user id, defined in .env 
+      - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
     volumes:
@@ -279,7 +283,7 @@ The goal here is to have an OpenVPN Client container running and always connecte
 This must come up with some safety features:
 
 1. VPN connection should be restarted if not responsive
-1. Traffic should be allowed through the VPN tunnel *only*, no leaky outgoing connection if the VPN is down
+1. Traffic should be allowed through the VPN tunnel _only_, no leaky outgoing connection if the VPN is down
 1. Deluge Web UI should still be reachable from the local network
 
 Lucky me, someone already [set that up quite nicely](https://github.com/dperson/openvpn-client).
@@ -294,7 +298,7 @@ I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 
 #### privateinternetaccess.com custom setup
 
-*Note*: this section only applies for [PIA](https://privateinternetaccess.com) accounts.
+_Note_: this section only applies for [PIA](https://privateinternetaccess.com) accounts.
 
 Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
@@ -347,35 +351,33 @@ Then, rename `<country>.ovpn` to `vpn.conf`
 Put it in the docker-compose file, and make deluge use the vpn container network:
 
 ```yaml
-  vpn:
-    container_name: vpn
-    image: dperson/openvpn-client:latest
-    cap_add:
-      - net_admin # required to modify network interfaces
-    restart: unless-stopped
-    volumes:
-      - /dev/net:/dev/net:z # tun device
-      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
-    security_opt:
-      - label:disable
-    ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-r 192.168.1.0/24' # route local network traffic
+vpn:
+  container_name: vpn
+  image: dperson/openvpn-client:latest
+  cap_add:
+    - net_admin # required to modify network interfaces
+  restart: unless-stopped
+  volumes:
+    - /dev/net:/dev/net:z # tun device
+    - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
+  security_opt:
+    - label:disable
+  ports:
+    - 8112:8112 # port for deluge web UI to be reachable from local network
+  command: "-r 192.168.1.0/24" # route local network traffic
 
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: always
-    network_mode: service:vpn # run on the vpn network
-    environment:
-      - PUID=${PUID} # default user id, defined in .env 
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/deluge:/config # config files
-
-
+deluge:
+  container_name: deluge
+  image: linuxserver/deluge:latest
+  restart: always
+  network_mode: service:vpn # run on the vpn network
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - ${ROOT}/downloads:/downloads # downloads folder
+    - ${ROOT}/config/deluge:/config # config files
 ```
 
 Notice how deluge is now using the vpn container network, with deluge web UI port exposed on the vpn container for local network access.
@@ -394,19 +396,19 @@ Get the torrent magnet link there, put it in Deluge, wait a bit, then you should
 No surprise: let's use linuxserver.io container !
 
 ```yaml
-  jackett:
-    container_name: jackett
-    image: linuxserver/jackett:latest
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-      - ${ROOT}/config/jackett:/config # config files
+jackett:
+  container_name: jackett
+  image: linuxserver/jackett:latest
+  restart: unless-stopped
+  network_mode: host
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
+    - ${ROOT}/config/jackett:/config # config files
 ```
 
 Nothing particular in this configuration, it's pretty similar to other linuxserver.io images.
@@ -474,17 +476,17 @@ Luckily for us, Plex team already provides a maintained [Docker image for pms](h
 We'll use the host network directly, and run our container with the following configuration:
 
 ```yaml
-  plex-server:
-    container_name: plex-server
-    image: plexinc/pms-docker:latest
-    restart: unless-stopped
-    environment:
-      - TZ=${TZ} # timezone, defined in .env
-    network_mode: host
-    volumes:
-      - ${ROOT}/config/plex/db:/config # plex database
-      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete:/data # media library
+plex-server:
+  container_name: plex-server
+  image: plexinc/pms-docker:latest
+  restart: unless-stopped
+  environment:
+    - TZ=${TZ} # timezone, defined in .env
+  network_mode: host
+  volumes:
+    - ${ROOT}/config/plex/db:/config # plex database
+    - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
+    - ${ROOT}/complete:/data # media library
 ```
 
 Let's run it !
@@ -515,20 +517,6 @@ A few things I like to configure in the settings:
 
 You can already watch your stuff through the Web UI. Note that it's also available from an authentified public URL proxified by Plex servers (see `Settings/Server/Remote Access`), you may note the URL or choose to disable public forwarding.
 
-#### Download subtitles automatically with sub-zero
-
-Do you know [subliminal](https://github.com/Diaoul/subliminal)?
-It's a cli/libraries made to grab subtitles automatically. Give it a file or directory, it will parse all existing videos in there, and try to download the most appropriate subtitles from several subtitle providers, based on video properties and names.
-Since subtitle sync is tightly related to the version of the video, try as much as possible to keep release information in the video filename. You know, stuff such as 'mytvshow.HDTV.x264-SVA[ettv].mp4'.
-
-Based on subliminal, a plugin called [sub-zero](https://github.com/pannal/Sub-Zero.bundle) recently landed in Plex channels. Running as a Plex agent, it will fetch subtitle automatically as new files get added to your library. It also runs in background, periodically fetching missing subtitles.
-
-To install it, just go to Plex channels, look for sub-zero, and activate it.
-
-Then, configure it as the agent for your libraries (see the [official instructions](https://github.com/pannal/Sub-Zero.bundle/wiki/Agent-configuration)), and configure it as you wish. I set my primary language to french and secondary one to english.
-
-You can provide your addic7ed and OpenSubtitles credentials for API requests.
-
 #### Setup Plex clients
 
 Plex clients are available for most devices. I use it on my Android phone, my wife uses it on her iPhone, we use it on a Chromecast in the bedroom, and we also use Plex Media Center directly on the same computer where the server is running, close to the living room TV. It also works fine on the PS4 and on my Raspberry Pi. Nothing particular to configure, just download the app, log into it, enter the validation code and there you go.
@@ -543,7 +531,7 @@ If it does not suit you, there is also now an official [Kodi add-on for Plex](ht
 
 Also the old good Plex Home Theater is still available, in an open source version called [OpenPHT](https://github.com/RasPlex/OpenPHT).
 
-Personal choice: after using OpenPHT for a while I'll give Plex Media Player a try. I might miss the ability to live-edit subtitle offset, but sub-zero is supposed to do its job. We'll see.
+Personal choice: after using OpenPHT for a while I'll give Plex Media Player a try. I might miss the ability to live-edit subtitle offset, but Bazarr is supposed to do its job. We'll see.
 
 ### Setup Sonarr
 
@@ -581,7 +569,7 @@ Sonarr should be available on `localhost:8989`. Go straight to the `Settings` ta
 ![Sonarr settings](img/sonarr_settings.png)
 
 Enable `Ignore Deleted Episodes`: if like me you delete files once you have watched them, this makes sure the episodes won't be re-downloaded again.
-In `Media Management`, you can choose to rename episodes automatically. This is a very nice feature I've been using for a long time; but now I choose to keep original names. Plex sub-zero plugins gives better results when the original filename (containing the usual `x264-EVOLVE[ettv]`-like stuff) is kept.
+In `Media Management`, you can choose to rename episodes automatically. This is a very nice feature I've been using for a long time.
 In `profiles` you can set new quality profiles, default ones are fairly good. There is an important option at the bottom of the page: do you want to give priority to Usenet or Torrents for downloading episodes? I'm keeping the default Usenet first.
 
 `Indexers` is the important tab: that's where Sonarr will grab information about released episodes. Nowadays a lot of Usenet indexers are relying on Newznab protocol: fill-in the URL and API key you are using. You can find some indexers on this [subreddit wiki](https://www.reddit.com/r/usenet/wiki/indexers). It's nice to use several ones since there are quite volatile. You can find suggestions on Sonarr Newznab presets. Some of these indexers provide free accounts with a limited number of API calls, you'll have to pay to get more. Usenet-crawler is one of the best free indexers out there.
@@ -614,7 +602,7 @@ Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-*Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files.*
+_Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files._
 
 Enter the series name, then you can choose a few things:
 
@@ -641,7 +629,7 @@ Radarr is a fork of Sonarr, made for movies instead of TV shows. For a good whil
 
 #### Docker container
 
-Radarr is *very* similar to Sonarr. You won't be surprised by this configuration.
+Radarr is _very_ similar to Sonarr. You won't be surprised by this configuration.
 
 ```yaml
   radarr:
@@ -665,7 +653,7 @@ Radarr is *very* similar to Sonarr. You won't be surprised by this configuration
 Radarr Web UI is available on port 7878.
 Let's go straight to the `Settings` section.
 
-In `Media Management`, I chose to disable automatic movie renaming. Too bad, but it's helpful for Plex sub-zero plugin to find proper subtitles for the movie (ie. keep that `x264-720p-YIFY` tag to look for the right subtitle). I enable `Ignore Deleted Movies` to make sure movies that I delete won't be downloaded again by Radarr. I disable `Use Hardlinks instead of Copy` because I prefer to avoid messing around what's in my download area and what's in my movies area.
+In `Media Management`, you can choose whether or not to enable automatic renaming. Previously I used the sub-zero plugin to find subtitles which functioned better with the original filenames. But now with Bazarr, it's hooked directly into Radarr and Sonarr which means it will look at the original filenames anyway. I enable `Ignore Deleted Movies` to make sure movies that I delete won't be downloaded again by Radarr. I disable `Use Hardlinks instead of Copy` because I prefer to avoid messing around what's in my download area and what's in my movies area.
 
 In `Profiles` you can set new quality profiles, default ones are fairly good. There is an important option at the bottom of the page: do you want to give priority to Usenet or Torrents for downloading episodes? I'm keeping the default Usenet first.
 
@@ -728,14 +716,69 @@ This can be set up in `Settings/Lists`. I activated the following lists:
 
 I disabled automatic sync for these lists: I want them to show when I add a new movie, but I don't want every item of these lists to be automatically synced with my movie library.
 
+### Setup Bazarr
+
+In previous versions of this guide, I used the sub-zero plugin for plex. Based on someone's suggestion on this project I tried out [Bazarr](https://www.bazarr.media/) which hooks directly into Radarr and Sonarr and makes the process more effective and painless. If you don't care about subtitles go ahead and skip this step.
+
+#### Docker container
+
+Believe it or not, we will be using yet another docker container from linuxserver! Since this is made to be a companion app for Sonarr and Radarr, you will notice that the configuration is very similar to them, just point it at the directories where you store your organized movies and tv shows.
+
+```yaml
+bazarr:
+  container_name: bazarr
+  image: linuxserver/bazarr
+  restart: unless-stopped
+  network_mode: host
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TV} # timezone, defined in .env
+    - UMASK_SET=022 #optional
+  volumes:
+    - ${ROOT}/config/bazarr:/config # config files
+    - ${ROOT}/complete/movies:/movies # movies folder
+    - ${ROOT}/complete/tv:/tv # tv shows folder
+  ports:
+    - 6767:6767
+```
+
+#### Configuration
+
+The Web UI for Bazarr will be available on port 6767. Load it up and you will be greeted with this setup page:
+
+![Bazarr configuration](img/bazarr_start.png)
+
+You can leave this page blank and go straight to the next page, "Subtitles". There are many options for different subtitle providers to use, but in this guide I'll be using [Open Subtitles](https://www.opensubtitles.org/). If you don't have an account with them, head on over to the [Registration page](https://www.opensubtitles.org/en/newuser) and make a new account. Then all you need to do is tick the box for OpenSubtitles and fill in your new account details.
+
+![Bazarr Open Subtitles](img/bazarr_opensubtitles.png)
+
+You can always add more subtitle providers if you want, figure out which ones are good for you!
+
+Next scroll to the bottom of the screen where you will find your language settings. I am interested in French as well as English subtitles so I will add both of them for enabled languages. However I am primarily interested in French so I will turn on "Default Enabled" for both TV and movies and finally set French to be that default.
+
+![Bazarr Languages](img/bazarr_language.png)
+
+Click next and we will be on the Sonarr setup page. For this part we will need our Sonarr API key. To get this, open up sonarr in a separate tab and navigate to `Settings > General > Security` and copy the api key listed there.
+
+![Sonarr API Key](img/bazarr_sonarr_api.png)
+
+Head back over Bazarr and check the "Use Sonarr" box and some settings will pop up. Paste your API key in the proper field, and you can leave the other options default. If you would like, you can tick the box for "Download Only Monitored" which will prevent Bazarr from downloading subtitles for tv shows you have in your Sonarr library but have possibly deleted from your drive. Then click "Test" and Sonarr should be all set!
+
+![Bazarr Sonarr Setup](img/bazarr_sonarr.png)
+
+The next step is connecting to Radarr and the process should be identical. The only difference is that you'll have to grab your Radarr API key instead of Sonarr. Once that's done click Finish and you will be brought to your main screen where you will be greeted with a message saying that you need to restart. Click this and Bazarr should reload. Once that's all set, you should be good to go!
+
+If you have any problems, check out the [wiki page](https://github.com/morpheus65535/bazarr/wiki/First-time-installation-configuration) for Bazarr and you should probably find your answer!
+
 ## Manage it all from your mobile
 
 On Android, I'm using [nzb360](http://nzb360.com) to manage NZBGet, Deluge, Sonarr and Radarr.
-It's a beautiful and well-thinked app. Easy to get a look at upcoming tv shows releases (eg. "when will the next f**cking Game of Thrones episode be released?").
+It's a beautiful and well-thinked app. Easy to get a look at upcoming tv shows releases (eg. "when will the next f\*\*cking Game of Thrones episode be released?").
 
 ![NZB360](img/nzb360.png)
 
-The free version does not allow you to add new shows. Consider switching to the paid version (6$) and support the developer.
+The free version does not allow you to add new shows. Consider switching to the paid version (6\$) and support the developer.
 
 ## Going Further
 
