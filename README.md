@@ -46,9 +46,8 @@ All automated.
       - [Give it a try](#give-it-a-try)
       - [Movie discovering](#movie-discovering)
     - [Setup Bazarr](#setup-bazarr)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-      - [Give it a try](#give-it-a-try)
+      - [Bazarr Docker container](#bazarr-docker-container)
+      - [Bazarr Configuration](#bazarr-configuration)
   - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
   - [Going Further](#going-further)
 
@@ -720,7 +719,7 @@ I disabled automatic sync for these lists: I want them to show when I add a new 
 
 In previous versions of this guide, I used the sub-zero plugin for plex. Based on someone's suggestion on this project I tried out [Bazarr](https://www.bazarr.media/) which hooks directly into Radarr and Sonarr and makes the process more effective and painless. If you don't care about subtitles go ahead and skip this step.
 
-#### Docker container
+#### Bazarr Docker container
 
 Believe it or not, we will be using yet another docker container from linuxserver! Since this is made to be a companion app for Sonarr and Radarr, you will notice that the configuration is very similar to them, just point it at the directories where you store your organized movies and tv shows.
 
@@ -743,7 +742,7 @@ bazarr:
     - 6767:6767
 ```
 
-#### Configuration
+#### Bazarr Configuration
 
 The Web UI for Bazarr will be available on port 6767. Load it up and you will be greeted with this setup page:
 
