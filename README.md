@@ -601,7 +601,7 @@ Let's add a series !
 
 ![Adding a serie](img/sonarr_add.png)
 
-_Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files._
+_Note: You may need to `chown -R $USER:$USER /path/to/root/directory` so Sonarr and the rest of the apps have the proper permissions to modify and move around files. This Docker image of Sonarr uses an internal user account inside the container called `abc` some you may have to set this user as owner of the directory where it will place the media files after download. This note also applies for Radarr._
 
 Enter the series name, then you can choose a few things:
 
