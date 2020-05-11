@@ -105,7 +105,7 @@ services:
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TV} # timezone, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
       - UMASK_SET=022 #optional
     volumes:
       - ${ROOT}/config/bazarr:/config # config files
