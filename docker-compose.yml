@@ -96,6 +96,22 @@ services:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
       - ${ROOT}/complete:/data # media library
+  emby:
+    container_name: emby
+    image: linuxserver/emby:latest
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${ROOT}/complete/movies:/data/movies
+      - ${ROOT}/complete/tv:/data/tvshows
+      - /etc/localtime:/etc/localtime:ro
+      - ${ROOT}/config/emby:/config
+    ports:
+      - 8096:8096
 
   bazarr:
     container_name: bazarr
