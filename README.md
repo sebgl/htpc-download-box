@@ -770,6 +770,69 @@ The next step is connecting to Radarr and the process should be identical. The o
 
 If you have any problems, check out the [wiki page](https://github.com/morpheus65535/bazarr/wiki/First-time-installation-configuration) for Bazarr and you should probably find your answer.
 
+### Emby
+Using emby is optional, many of it's features are supported by Plex.
+What you gain from using emby is :
+* No need for username / password and giving your info to a corporation
+* You can stream your media to your mobile devices without having to pay.
+
+### Setup Emby
+
+#### Docker container
+
+We'll use emby Docker image from linuxserver
+
+```yaml
+version: "3"
+services:
+  emby:
+    container_name: emby
+    image: linuxserver/emby:latest
+    restart: always
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${ROOT}/complete/movies:/data/movies # movies path
+      - ${ROOT}/complete/tv:/data/tvshows # tv series path
+      - ${ROOT}/config/emby:/config # config files
+    ports:
+      - 8096:8096 # port for emby web UI to be reachable from local network 
+    
+```
+
+Then run the container with `docker-compose up -d`.
+To follow container logs, run `docker-compose logs -f emby`.
+After running the container, web UI should be available on `localhost:8096`.
+
+#### Configuration
+
+In the first screen selected the preffered language for the emby ui
+
+![Emby setup language](img/emby_setup_language.png)
+
+In the second screen create the password for the default user and modify the username. Optionally you can link with your emby connect account.
+
+![Emby setup password](img/emby_setup_user.png)
+
+The third screen is the most important one. Here we will setup where our libararies reside.
+
+![Emby setup libraries](img/emby_setup_libraries.png)
+
+By clicking the `+ New Library` button, we select `Movies` as the content type, we can modify the display name, and on the `Folders` category click on the `+` icon and select `/data/movies`
+After that we can modify the Library Settings to our likings. Please leave the `Enable realtime monitoring` checked.
+
+![Emby setup mobies](img/emby_setup_libraries_movies.png)
+
+Repeat the same steps for tv shows, choose type TV Shows and folder `/data/tvshows`. Please leave the `Enable realtime monitoring` checked.
+
+![Emby setup mobies](img/emby_setup_libraries_tvshows.png)
+
+After you are done, click `next - next - next` and you should have successully setup Emby !
+
 ## Manage it all from your mobile
 
 On Android, I'm using [nzb360](http://nzb360.com) to manage NZBGet, Deluge, Sonarr and Radarr.
