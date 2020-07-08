@@ -21,6 +21,7 @@ services:
       - 9091:9091 # Transmission web UI
       - 51413:51413 # Transmission bittorrent daemon
       - 51413:51413/udp # Transmission bittorrent daemon
+      - 8112:8112 # port for deluge web UI to be reachable from local network
 
   transmission:
     image: linuxserver/transmission:latest
@@ -34,6 +35,20 @@ services:
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${CONFIG}/config/transmission:/config # config files
+
+  deluge:
+    container_name: deluge
+    image: linuxserver/deluge:latest
+    restart: unless-stopped
+    network_mode: service:vpn # run on the vpn network
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${CONFIG}/config/deluge:/config # config files
+
 
   jackett:
     container_name: jackett
