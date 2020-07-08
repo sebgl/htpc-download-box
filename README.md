@@ -10,9 +10,10 @@ All automated.
 - [Pi HTPC Download Box](#htpc-download-box)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
-    - [Monitor TV shows/movies with Sonarr and Radarr](#monitor-tv-showsmovies-with-sonarr-and-radarr)
-    - [Search for releases automatically with Usenet and torrent indexers](#search-for-releases-automatically-with-usenet-and-torrent-indexers)
-    - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#handle-bittorrent-and-usenet-downloads-with-deluge-and-nzbget)
+    - [Monitor TV shows/movies with Sonarr and Radarr](#overview)
+    - [Search for releases automatically with Usenet and torrent indexers](#overview)
+    - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#overview)
+    - [Organize libraries and play videos with Plex](#overview)
   - [Hardware configuration](#hardware-configuration)
   - [Software stack](#software-stack)
   - [Installation guide](#installation-guide)
@@ -69,6 +70,7 @@ I use a Pi 3B but I have added the instructions for older Pi like the 1B and tes
 - [Deluge](http://deluge-torrent.org/): torrent downloader with a web UI
 - [NZBGet](https://nzbget.net): usenet downloader with a web UI
 - [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
+- [Bazarr](https://www.bazarr.media/): A companion tool for Radarr and Sonarr which will automatically pull subtitles for all of your TV and movie downloads.
 
 **Download orchestration**:
 
@@ -392,13 +394,13 @@ Uncomment container instructions in `docker.compose.yml`
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-radarr)
 
+### Setup Bazarr
+
+[See original instructions](https://github.com/sebgl/htpc-download-box#setup-bazarr)
+
 #### Remotly Add Movies Using trakt.tv And List
 
 [Instructions](https://www.reddit.com/r/radarr/comments/aixb2i/how_to_setup_trakttv_for_lists/)
-
-### Setup Bazarr
-
-[Instructions](https://github.com/morpheus65535/bazarr/wiki/Wizard-General)
 
 ### Reduce Pi Power Consumption
 
