@@ -1,6 +1,6 @@
 # Pi HTPC Download Box
 
-Sonarr / Radarr / Bazarr / Jackett / NZBGet / Transmission / NordVPN / Plex
+Sonarr / Radarr / Bazarr / Jackett / NZBGet / Transmission / Deluge / NordVPN / Plex
 
 TV shows and movies download, sort, with the desired quality and subtitles, behind a VPN (optional), ready to watch, in a beautiful media player.
 All automated.
@@ -22,6 +22,9 @@ All automated.
       - [Create NTFS folder on NAS](create-ntfs-folder-on-NAS)
       - [Mount NTFS folder on Pi](mount-ntfs-folder-on-Pi)
     - [Setup Transmission](#setup-transmission)
+      - [Docker container](#docker-container)
+      - [Configuration](#configuration)
+    - [Setup Deluge](#setup-deluge)
       - [Docker container](#docker-container)
       - [Configuration](#configuration)
     - [Setup a VPN Container](#setup-a-vpn-container)
@@ -63,6 +66,7 @@ I use a Pi 3B but I have added the instructions for older Pi like the 1B and tes
 **Downloaders**:
 
 - [Transmission](https://transmissionbt.com/): torrent downloader with a web UI
+- [Deluge](http://deluge-torrent.org/): torrent downloader with a web UI
 - [NZBGet](https://nzbget.net): usenet downloader with a web UI
 - [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
 
@@ -93,7 +97,7 @@ The stack is not really plug-and-play. You'll see that manual human configuratio
 
 Optional steps described below that you may wish to skip:
 
-- Using a VPN server for Transmission incoming/outgoing traffic.
+- Using a VPN server for Transmission and/or Deluge incoming/outgoing traffic.
 - Using newsgroups (Usenet): you can skip NZBGet installation and all related Sonarr/Radarr indexers configuration if you wish to use bittorrent only.
 
 ### Install docker and docker-compose
@@ -164,7 +168,7 @@ Things to notice:
 - TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 - The PUID and PGID are your user's ids. Find them with `id $USER`.
 - This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
-- You local network mask to make transmission accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
+- You local network mask to make Transmission and/or Deluge accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
 - Your NordVPN password/login and VPN server country
 
 ### Setup NAS
@@ -199,7 +203,8 @@ sudo mount -a
 
 #### Docker container
 
-We'll use transmission Docker image from linuxserver, which runs both the transmission daemon and web UI in a single container.
+We'll use Transmission Docker image from linuxserver, which runs both the Transmission daemon and web UI in a single container.
+If you prefere Deluge just comment those lines in `docker-compose.yml`
 
 ```yaml
 transmission:
@@ -249,11 +254,43 @@ You can use the Web UI manually to download any torrent from a .torrent file or 
 
 You should also add a [blacklist](https://giuliomac.wordpress.com/2014/02/19/best-blocklist-for-transmission/) for extra protection
 
+### Setup Deluge
+
+#### Docker container
+
+We'll use Deluge Docker image from linuxserver, which runs both the Deluge daemon and web UI in a single container.
+If you prefere Transmission just comment those lines in `docker-compose.yml`
+
+```yaml
+  deluge:
+    container_name: deluge
+    image: linuxserver/deluge:latest
+    restart: unless-stopped
+    network_mode: service:vpn # run on the vpn network
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+    volumes:
+      - ${ROOT}/downloads:/downloads # downloads folder
+      - ${CONFIG}/config/deluge:/config # config files
+```
+
+Things to notice:
+
+- I use the host network to simplify configuration. Important ports are `8112` (web UI).
+
+Then run the container with `docker-compose up -d`.
+To follow container logs, run `docker-compose logs -f deluge`.
+
+#### Configuration
+[See original instructions](https://github.com/sebgl/htpc-download-box#setup-deluge)
+
 ### Setup a VPN Container
 
 #### Introduction
 
-The goal here is to have an NordVPN Client container running and always connected. We'll make Transmission incoming and outgoing traffic go through this NordVPN container.
+The goal here is to have an NordVPN Client container running and always connected. We'll make Transmission and/or Deluge incoming and outgoing traffic go through this NordVPN container.
 
 This must come up with some safety features:
 
@@ -263,7 +300,7 @@ This must come up with some safety features:
 
 #### Docker container
 
-Put it in the docker-compose file, and make transmission use the vpn container network:
+Put it in the docker-compose file, and make transmissionand/or Deluge use the vpn container network:
 
 ```yaml
 vpn:
@@ -287,6 +324,7 @@ vpn:
     - 9091:9091 # Transmission web UI
     - 51413:51413 # Transmission bittorrent daemon
     - 51413:51413/udp # Transmission bittorrent daemon
+    - 8112:8112 # port for deluge web UI to be reachable from local network
 
 transmission:
   image: linuxserver/transmission:latest
@@ -300,12 +338,25 @@ transmission:
   volumes:
     - ${ROOT}/downloads:/downloads # downloads folder
     - ${CONFIG}/config/transmission:/config # config files
+    
+deluge:
+  container_name: deluge
+  image: linuxserver/deluge:latest
+  restart: unless-stopped
+  network_mode: service:vpn # run on the vpn network
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - ${ROOT}/downloads:/downloads # downloads folder
+    - ${CONFIG}/config/deluge:/config # config files
 ```
 
-Notice how transmission is now using the vpn container network, with transmission web UI port exposed on the vpn container for local network access.
+Notice how transmission and/or Deluge is now using the vpn container network, with Transmission and/or Deluge web UI port exposed on the vpn container for local network access.
 
-You can check that transmission is properly going out through the VPN IP by using [torguard check](https://torguard.net/checkmytorrentipaddress.php).
-Get the torrent magnet link there, put it in Transmission, wait a bit, then you should see your outgoing torrent IP on the website.
+You can check that Transmission and/or Deluge is properly going out through the VPN IP by using [torguard check](https://torguard.net/checkmytorrentipaddress.php).
+Get the torrent magnet link there, put it in Transmission and/or Deluge, wait a bit, then you should see your outgoing torrent IP on the website.
 
 ![Torrent guard](img/torrent_guard.png)
 
