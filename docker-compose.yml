@@ -13,7 +13,7 @@ services:
       - label:disable
     ports:
       - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
+    command: '-d -f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
 
   deluge:
     container_name: deluge
