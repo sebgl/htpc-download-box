@@ -115,10 +115,9 @@ sudo groupadd docker
 sudo gpasswd -a $USER docker
 newgrp docker
 # install docker-compose
-sudo apt install -y libffi6 libffi-dev
 # For newer Pi like 3B
-sudo apt install -y python python-pip
-sudo pip install docker-compose # take a long time to run
+sudo apt install -y python3 python3-pip
+sudo pip3 install docker-compose # take a long time to run
 # For older Pi like 1B+
 # sudo apt install docker-compose
 ```
