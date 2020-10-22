@@ -104,6 +104,12 @@ Optional steps described below that you may wish to skip:
 
 ### Install docker and docker-compose
 
+### Hypriot OS
+
+I recently switched to [Hypriot OS](https://blog.hypriot.com/), it come with docker preinstall and support all the Pi versions.
+
+#### Manual install
+
 ```
 sudo apt update
 # install docker
@@ -129,7 +135,7 @@ More infos:
 
 [Docker Compose](https://withblue.ink/2017/12/31/yes-you-can-run-docker-on-raspbian.html)
 
-### (optional) Use premade docker-compose
+##### (optional) Use premade docker-compose
 
 This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
 
@@ -263,18 +269,18 @@ We'll use Deluge Docker image from linuxserver, which runs both the Deluge daemo
 If you prefere Transmission just comment those lines in `docker-compose.yml`
 
 ```yaml
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: unless-stopped
-    network_mode: service:vpn # run on the vpn network
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${CONFIG}/config/deluge:/config # config files
+deluge:
+  container_name: deluge
+  image: linuxserver/deluge:latest
+  restart: unless-stopped
+  network_mode: service:vpn # run on the vpn network
+  environment:
+    - PUID=${PUID} # default user id, defined in .env
+    - PGID=${PGID} # default group id, defined in .env
+    - TZ=${TZ} # timezone, defined in .env
+  volumes:
+    - ${ROOT}/downloads:/downloads # downloads folder
+    - ${CONFIG}/config/deluge:/config # config files
 ```
 
 Things to notice:
@@ -285,6 +291,7 @@ Then run the container with `docker-compose up -d`.
 To follow container logs, run `docker-compose logs -f deluge`.
 
 #### Configuration
+
 [See original instructions](https://github.com/sebgl/htpc-download-box#setup-deluge)
 
 ### Setup a VPN Container
@@ -339,7 +346,7 @@ transmission:
   volumes:
     - ${ROOT}/downloads:/downloads # downloads folder
     - ${CONFIG}/config/transmission:/config # config files
-    
+
 deluge:
   container_name: deluge
   image: linuxserver/deluge:latest
