@@ -206,6 +206,40 @@ sudo mount -a
 
 (doesn't work when pi restart need to investigate)
 
+### Setup Yacht
+
+#### Docker container
+
+We'll use [Yacht](https://yacht.sh/) Docker image to monitor the other containers, it's an alternative to [Portainer](https://www.portainer.io/).
+
+```yaml
+yacht:
+  container_name: yacht
+  restart: unless-stopped
+  ports:
+    - 8000:8000
+  volumes:
+    - ${CONFIG}/config/yacht:/config
+    - /var/run/docker.sock:/var/run/docker.sock
+  image: selfhostedpro/yacht
+
+volumes:
+  yacht:
+```
+
+Things to notice:
+
+- I use the host network to simplify configuration. The web ui is located on port `8000` (web UI).
+
+Then run the container with `docker-compose up -d`.
+To follow container logs, run `docker-compose logs -f yacht`.
+
+#### Configuration
+
+You should be able to login on the web UI (`localhost:8000`, replace `localhost` by your machine ip if needed).
+
+The default username is `admin@yacht.local` and password is `pass`.
+
 ### Setup Transmission
 
 #### Docker container
