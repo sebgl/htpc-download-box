@@ -106,6 +106,8 @@ Optional steps described below that you may wish to skip:
 
 I recently switched to [Hypriot OS](https://blog.hypriot.com/), it come with docker preinstall and support all the Pi versions.
 
+Default ssh username/password is `pirate/hypriot`.
+
 ```
 sudo apt-get update
 sudo apt-get install nfs-common
@@ -122,8 +124,21 @@ Env variables will only be used by Yacht, the rest will be configured directly o
 https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn
 
 ```sh
+# Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TZ=America/Los_Angeles
+# UNIX PUID and PGID, find with: id $USER
+PUID=1000
+PGID=1000
+# Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
+NETWORK=192.168.0.0/24
+# The directory where data will be stored.
+ROOT=/media
 # The directory where configuration will be stored.
 CONFIG=/config
+#NordVPN informations
+VPN_USER=usero@email.com
+VPN_PASSWORD=password
+VPN_COUNTRY=CA
 ```
 
 ### Setup NAS
@@ -185,40 +200,6 @@ To follow container logs, run `docker-compose logs -f yacht`.
 You should be able to login on the web UI (`localhost:8000`, replace `localhost` by your machine ip if needed).
 
 The default username is `admin@yacht.local` and password is `pass`.
-
-##### Template env variables
-
-Clean up all the already setup env variables
-
-Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-
-- add `!TZ` -> `America/Los_Angeles`
-
-UNIX PUID and PGID, find with: id \$USER
-
-- add `!PUID` -> `1000`
-- add `!PGID` -> `1000`
-
-```sh
-# Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
-NETWORK=192.168.0.0/24
-# The directory where data will be stored.
-ROOT=/media
-# The directory where configuration will be stored.
-CONFIG=/config
-#NordVPN informations
-VPN_USER=usero@email.com
-VPN_PASSWORD=password
-VPN_COUNTRY=CA
-```
-
-Things to notice:
-
-- TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-- The PUID and PGID are your user's ids. Find them with `id $USER`.
-- This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
-- You local network mask to make Transmission and/or Deluge accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
-- Your NordVPN password/login and VPN server country
 
 ### Setup Transmission
 
