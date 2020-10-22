@@ -18,7 +18,7 @@ All automated.
   - [Software stack](#software-stack)
   - [Installation guide](#installation-guide)
     - [Introduction](#introduction)
-    - [Install docker and docker-compose](#install-docker-and-docker-compose)
+    - [Hypriot OS](#hypriot-oS)
     - [Setup NTFS folder](#setup-ntfs-folder)
       - [Create NTFS folder on NAS](create-ntfs-folder-on-NAS)
       - [Mount NTFS folder on Pi](mount-ntfs-folder-on-Pi)
@@ -102,81 +102,29 @@ Optional steps described below that you may wish to skip:
 - Using a VPN server for Transmission and/or Deluge incoming/outgoing traffic.
 - Using newsgroups (Usenet): you can skip NZBGet installation and all related Sonarr/Radarr indexers configuration if you wish to use bittorrent only.
 
-### Install docker and docker-compose
-
 ### Hypriot OS
 
 I recently switched to [Hypriot OS](https://blog.hypriot.com/), it come with docker preinstall and support all the Pi versions.
 
-#### Manual install
-
 ```
-sudo apt update
-# install docker
-curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
-# For old Pi like B+ (v1.2) you need to downgrade docker version
-# there is probably a more direct and better way to do it but didn't look for it
-# sudo apt install docker-ce=18.06.2~ce~3-0~raspbian
-sudo groupadd docker
-sudo gpasswd -a $USER docker
-newgrp docker
-# install docker-compose
-# For newer Pi like 3B
-sudo apt install -y python3 python3-pip
-sudo pip3 install docker-compose # take a long time to run
-# For older Pi like 1B+
-# sudo apt install docker-compose
+sudo apt-get update
+sudo apt-get install nfs-common
 ```
-
-Docker-compose on 1B+ only support version 2 of `docker-compose.yml`, just change the version on top of the `docker-compose.yml` file and it should works (Nope need some investigations).
-More infos:
-
-[Docker](https://github.com/moby/moby/issues/38175)
-
-[Docker Compose](https://withblue.ink/2017/12/31/yes-you-can-run-docker-on-raspbian.html)
-
-##### (optional) Use premade docker-compose
-
-This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
-
-1. First, `https://github.com/marchah/pie-htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
-2. Rename the `.env.example` file included in the repo to `.env`.
-3. Continue this guide, and the docker-compose file snippets you see are already ready for you to use. You'll still need to manually configure your `.env` file and other manual configurations.
 
 ### Setup environment variables
 
-For each of these images, there is some unique coniguration that needs to be done. Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
+Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
 
 Here is an example of what your `.env` file should look like, use values that fit for your own setup.
 SQLlite use by sonarr and radarr doesn't like to be on a network folder so I separated the config folders env variable to keep them in the Pi.
+Env variables will only be used by Yacht, the rest will be configured directly on Yacht web UI.
 
 https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn
 
 ```sh
-# Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-TZ=America/Los_Angeles
-# UNIX PUID and PGID, find with: id $USER
-PUID=1000
-PGID=1000
-# Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
-NETWORK=192.168.0.0/24
-# The directory where data will be stored.
-ROOT=/media
 # The directory where configuration will be stored.
 CONFIG=/config
-#NordVPN informations
-VPN_USER=usero@email.com
-VPN_PASSWORD=password
-VPN_COUNTRY=CA
 ```
-
-Things to notice:
-
-- TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-- The PUID and PGID are your user's ids. Find them with `id $USER`.
-- This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
-- You local network mask to make Transmission and/or Deluge accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
-- Your NordVPN password/login and VPN server country
 
 ### Setup NAS
 
@@ -189,13 +137,13 @@ This is the instructions for a Synology but should be pretty much the same for a
 #### Mount NTFS folder on Pi
 
 ```
-mkdir /home/pi/Plex
+mkdir /home/pirate/Plex
 ```
 
 Add in `/etc/fstab`
 
 ```
-192.168.0.8:/volume1/Plex /home/pi/Plex nfs rw,hard,intr,rsize=8192,wsize=8192,timeo=14 0 0
+<your-nas-ip-address>:/volume1/Plex /home/pirate/Plex nfs rw,hard,intr,rsize=8192,wsize=8192,timeo=14 0 0
 ```
 
 Re mount
@@ -203,8 +151,6 @@ Re mount
 ```
 sudo mount -a
 ```
-
-(doesn't work when pi restart need to investigate)
 
 ### Setup Yacht
 
@@ -231,7 +177,7 @@ Things to notice:
 
 - I use the host network to simplify configuration. The web ui is located on port `8000` (web UI).
 
-Then run the container with `docker-compose up -d`.
+Then run the container with `docker-compose up -d yacht`.
 To follow container logs, run `docker-compose logs -f yacht`.
 
 #### Configuration
@@ -239,6 +185,40 @@ To follow container logs, run `docker-compose logs -f yacht`.
 You should be able to login on the web UI (`localhost:8000`, replace `localhost` by your machine ip if needed).
 
 The default username is `admin@yacht.local` and password is `pass`.
+
+##### Template env variables
+
+Clean up all the already setup env variables
+
+Your timezone, https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+- add `!TZ` -> `America/Los_Angeles`
+
+UNIX PUID and PGID, find with: id \$USER
+
+- add `!PUID` -> `1000`
+- add `!PGID` -> `1000`
+
+```sh
+# Local network mask, find with: ip route | awk '!/ (docker0|br-)/ && /src/ {print $1}'
+NETWORK=192.168.0.0/24
+# The directory where data will be stored.
+ROOT=/media
+# The directory where configuration will be stored.
+CONFIG=/config
+#NordVPN informations
+VPN_USER=usero@email.com
+VPN_PASSWORD=password
+VPN_COUNTRY=CA
+```
+
+Things to notice:
+
+- TZ is based on your [tz time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+- The PUID and PGID are your user's ids. Find them with `id $USER`.
+- This file should be in the same directory as your `docker-compose.yml` file so the values can be read in.
+- You local network mask to make Transmission and/or Deluge accessible in your local network, [more infos](https://github.com/bubuntux/nordvpn#local-network-access-to-services-connecting-to-the-internet-through-the-vpn)
+- Your NordVPN password/login and VPN server country
 
 ### Setup Transmission
 
