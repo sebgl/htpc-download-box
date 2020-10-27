@@ -12,20 +12,21 @@ services:
 
   vpn:
     container_name: vpn
-    image: bubuntux/nordvpn@sha256:df65016c673df18b07295c46c70ee0d00e5cb44eb77f51ee373c1ec0ff2278d8
+    image: bubuntux/nordvpn:3.7.4
     cap_add:
-      - net_admin # required to modify network interfaces
+      - NET_ADMIN # required to modify network interfaces
+      - SYS_MODULE # required for TECHNOLOGY=NordLynx
     restart: unless-stopped
+    sysctls:
+      - net.ipv4.conf.all.rp_filter=2
     devices:
       - /dev/net/tun
     environment:
       - USER=${VPN_USER} # vpn user, defined in .env
       - PASS=${VPN_PASSWORD} # vpn password, defined in .env
-      - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
+      - CONNECT=${VPN_COUNTRY} # vpn country, defined in .env
       - NETWORK=${NETWORK} # local network mask, defined in .env
-      - PROTOCOL=UDP
-      - CATEGORY=P2P
-      - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
+      - TECHNOLOGY=NordLynx
       - TZ=${TZ} # timezone, defined in .env
     ports:
       - 9091:9091 # Transmission web UI
