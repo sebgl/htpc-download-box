@@ -299,7 +299,7 @@ I'm using a privateinternetaccess.com VPN, so here is how I set it up.
 
 _Note_: this section only applies for [PIA](https://privateinternetaccess.com) accounts.
 
-Download PIA OpenVPN [configuration files](https://privateinternetaccess.com/openvpn/openvpn.zip).
+Download PIA OpenVPN [configuration files](https://www.privateinternetaccess.com/openvpn/openvpn-nextgen.zip).
 In the archive, you'll find a bunch of `<country>.ovpn` files, along with 2 other important files: `crl.rsa.2048.pem` and `ca.rsa.2048.crt`. Pick the file associated to the country you'd like to connect to, for example `netherlands.ovpn`.
 
 Copy the 3 files to `${ROOT}/config/vpn`.
