@@ -93,7 +93,7 @@ I use a Pi 3B but I have added the instructions for older Pi like the 1B and tes
 The idea is to set up all these components as Docker containers in a `docker-compose.yml` file.
 We'll reuse community-maintained images (special thanks to [linuxserver.io](https://www.linuxserver.io/) for many of them).
 I'm assuming you have some basic knowledge of Linux and Docker.
-A general-purpose `docker-compose` file is maintained in this repo [here](https://github.com/sebgl/htpc-download-box/blob/master/docker-compose.yml).
+A general-purpose `docker-compose` file is maintained in this repo [here](https://github.com/marchah/pi-htpc-download-box/blob/master/docker-compose.yml).
 
 The stack is not really plug-and-play. You'll see that manual human configuration is required for most of these tools. Configuration is not fully automated (yet?), but is persisted on reboot. Some steps also depend on external accounts that you need to set up yourself (usenet indexers, torrent indexers, vpn server, plex account, etc.). We'll walk through it.
 
