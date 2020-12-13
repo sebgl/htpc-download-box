@@ -104,7 +104,7 @@ services:
 
   radarr:
     container_name: radarr
-    image: linuxserver/radarr:latest
+    image: linuxserver/radarr:version-v0.2.0.1504
     restart: unless-stopped
     network_mode: host
     environment:
