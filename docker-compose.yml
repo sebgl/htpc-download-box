@@ -13,6 +13,7 @@ services:
   vpn:
     container_name: vpn
     image: bubuntux/nordvpn:3.7.4
+    network_mode: host
     cap_add:
       - NET_ADMIN # required to modify network interfaces
       - SYS_MODULE # required for TECHNOLOGY=NordLynx
