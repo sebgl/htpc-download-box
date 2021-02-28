@@ -494,6 +494,9 @@ Let's run it !
 #### Configuration
 
 Plex Web UI should be available at `localhost:32400/web` (replace `localhost` by your server ip if needed).
+
+Note: If you are running on a headless server (e.g. Synology NAS) with container using host networking, you will need to use ssh tunneling to gain access and setup the server for first run. (see https://forums.plex.tv/t/i-did-something-stupid-please-plex-forums-your-my-only-hope/328481/11)
+
 You'll have to login first (registration is free), then Plex will ask you to add your libraries.
 I have two libraries:
 
