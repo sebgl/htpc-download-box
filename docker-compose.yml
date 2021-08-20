@@ -47,18 +47,23 @@ services:
       - 51413:51413 # Transmission bittorrent daemon
       - 51413:51413/udp # Transmission bittorrent daemon
       - 8112:8112 # port for deluge web UI to be reachable from local network
-      - 5800:5800 # port for firefox
+      - 5800:3000 # port for firefox
     command: '-f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
 
 
 
   firefox:
-    image: jlesage/firefox:latest
+    image: ghcr.io/linuxserver/firefox:latest
     container_name: firefox
     restart: unless-stopped
     network_mode: service:openvpn # run on the vpn network
+    shm_size: "1gb"
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
     volumes:
-      - ${CONFIG}/config/firefox:/config:rw # config files
+      - ${CONFIG}/config/firefox:/config # config files
 
   transmission:
     image: linuxserver/transmission:latest
@@ -130,7 +135,7 @@ services:
 
   radarr:
     container_name: radarr
-    image: linuxserver/radarr:version-v0.2.0.1504
+    image: linuxserver/radarr:latest
     restart: unless-stopped
     network_mode: host
     environment:
@@ -147,7 +152,6 @@ services:
     container_name: bazarr
     image: linuxserver/bazarr:latest
     restart: unless-stopped
-    network_mode: host
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -169,7 +173,6 @@ services:
       - PGID=${PGID} # default group id, defined in .env
       - TZ=${TZ} # timezone, defined in .env
       - VERSION=docker
-    network_mode: host
     volumes:
       - ${CONFIG}/config/plex/db:/config # plex database
       - ${CONFIG}/config/plex/transcode:/transcode # temp transcoded files
