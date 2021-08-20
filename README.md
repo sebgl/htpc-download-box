@@ -11,46 +11,42 @@ All automated.
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
     - [Monitor TV shows/movies with Sonarr and Radarr](#overview)
-    - [Search for releases automatically with Usenet and torrent indexers](#overview)
-    - [Handle bittorrent and usenet downloads with Deluge and NZBGet](#overview)
     - [Organize libraries and play videos with Plex](#overview)
-  - [Hardware configuration](#hardware-configuration)
-  - [Software stack](#software-stack)
+  - [Hardware configuration](#overview)
+  - [Software stack](#overview)
   - [Installation guide](#installation-guide)
     - [Introduction](#introduction)
     - [Hypriot OS](#hypriot-oS)
     - [Setup NTFS folder](#setup-ntfs-folder)
       - [Create NTFS folder on NAS](create-ntfs-folder-on-NAS)
       - [Mount NTFS folder on Pi](mount-ntfs-folder-on-Pi)
-    - [Setup Transmission](#setup-transmission)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-    - [Setup Deluge](#setup-deluge)
-      - [Docker container](#docker-container)
-      - [Configuration](#configuration)
-    - [Setup a VPN Container](#setup-a-vpn-container)
-      - [Introduction](#introduction)
-      - [Docker container](#docker-container)
-    - [Setup Jackett](#setup-jackett)
-    - [Setup NZBGet](#setup-nzbget)
-    - [Setup Plex](#setup-plex)
-    - [Setup Sonarr](#setup-sonarr)
-    - [Setup Radarr](#setup-radarr)
-    - [Setup Bazarr](#setup-bazarr)
+    - [Setup Transmission](#overview)
+    - [Setup Deluge](#overview)
+    - [Setup a VPN Container](#overview)
+    - [Setup Jackett](#overview)
+    - [Setup Plex](#overview)
+    - [Media Server Docker Container](#overview)
+    - [Configuration](#overview)
+    - [Setup Plex clients](#overview)
+    - [Setup Sonarr](#overview)
+    - [Setup Radarr](#overview)
+    - [Setup Bazarr](#overview)
       - [Remotly Add Movies Using trakt.tv And List](#remotly-add-movies-using-trakttv-and-list)
     - [Reduce Pi Power Consumption](#reduce-pi-power-consumption)
       - [Disable HDMI](#disable-hdmi)
       - [Turn Off LEDs](#turn-off-leds)
       - [Disable Wifi](#disable-wifi)
       - [Disable Bluetooth](#disable-bluetooth)
-  - [Manage it all from your mobile](#manage-it-all-from-your-mobile)
-  - [Going Further](#going-further)
+      - [Docker container](#docker-container)
+      - [Configuration](#configuration)
+      - [Give it a try](#give-it-a-try)
+      - [Movie discovering](#movie-discovering)
   - [Usefull Commands](#usefull-commands)
   - [TODO](#todo)
 
 ## Overview
-
 [See original instructions](https://github.com/sebgl/htpc-download-box#overview)
+
 
 ## Hardware configuration
 
@@ -59,32 +55,6 @@ I have a Synology DS2013j but it's too old to run sonarr/jackett/radarr/plex pro
 I use a Pi 3B but I have added the instructions for older Pi like the 1B and tested it but wasn't able to make it work.
 
 ![Error](img/raspberry_pi_1b_failure.png)
-
-## Software stack
-
-![Architecture Diagram](img/architecture_diagram.png)
-
-**Downloaders**:
-
-- [Transmission](https://transmissionbt.com/): torrent downloader with a web UI
-- [Deluge](http://deluge-torrent.org/): torrent downloader with a web UI
-- [NZBGet](https://nzbget.net): usenet downloader with a web UI
-- [Jackett](https://github.com/Jackett/Jackett): API to search torrents from multiple indexers
-- [Bazarr](https://www.bazarr.media/): A companion tool for Radarr and Sonarr which will automatically pull subtitles for all of your TV and movie downloads.
-
-**Download orchestration**:
-
-- [Sonarr](https://sonarr.tv): manage TV show, automatic downloads, sort & rename
-- [Radarr](https://radarr.video): basically the same as Sonarr, but for movies
-
-**VPN**:
-
-- [NordVPN](https://nordvpn.com)
-
-**Media Center**:
-
-- [Plex](https://plex.tv): media center server with streaming transcoding features, useful plugins and a beautiful UI. Clients available for a lot of systems (Linux/OSX/Windows, Web, Android, Chromecast, Android TV, etc.)
-- [Bazarr](https://www.bazarr.media): manage TV show and movies subtitles
 
 ## Installation guide
 
@@ -113,9 +83,38 @@ sudo apt-get update
 sudo apt-get install nfs-common
 ```
 
+Then add yourself to the `docker` group:
+`sudo usermod -aG docker myuser`
+
+Make sure it works fine:
+`docker run hello-world`
+
+Also install docker-compose (see the [official instructions](https://docs.docker.com/compose/install/#install-compose)).
+
+### (optional) Use premade docker-compose
+
+This tutorial will guide you along the full process of making your own docker-compose file and configuring every app within it, however, to prevent errors or to reduce your typing, you can also use the general-purpose docker-compose file provided in this repository.
+
+1. First, `git clone https://github.com/sebgl/htpc-download-box` into a directory. This is where you will run the full setup from (note: this isn't the same as your media directory)
+2. Rename the `.env.example` file included in the repo to `.env`.
+3. Continue this guide, and the docker-compose file snippets you see are already ready for you to use. You'll still need to manually configure your `.env` file and other manual configurations.
+
+
+### (optional) Use premade Vagrant box
+
+You can also use a premade Vagrant box, that will spin up an Ubuntu virtual machine and bootstrap the environment from the `docker-compose` file described above.
+
+After ensuring Vagrant is installed on your machine:
+
+1. Run `vagrant up` to bootstrap the vagrant box
+2. Run `vagrant ssh` to ssh into the box
+3. Use the default `192.168.7.7` IP to access the box services from a local machine
+
 ### Setup environment variables
 
+
 Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
+For each of these images, there is some unique configuration that needs to be done. Instead of editing the docker-compose file to hardcode these values in, we'll instead put these values in a .env file. A .env file is a file for storing environment variables that can later be accessed in a general-purpose docker-compose.yml file, like the example one in this repository.
 
 Here is an example of what your `.env` file should look like, use values that fit for your own setup.
 SQLlite use by sonarr and radarr doesn't like to be on a network folder so I separated the config folders env variable to keep them in the Pi.
@@ -151,6 +150,7 @@ This is the instructions for a Synology but should be pretty much the same for a
 
 #### Mount NTFS folder on Pi
 
+
 ```
 mkdir /home/pirate/Plex
 ```
@@ -167,237 +167,8 @@ Re mount
 sudo mount -a
 ```
 
-### Setup Yacht
-
-#### Docker container
-
-We'll use [Yacht](https://yacht.sh/) Docker image to monitor the other containers, it's an alternative to [Portainer](https://www.portainer.io/).
-
-```yaml
-yacht:
-  container_name: yacht
-  restart: unless-stopped
-  ports:
-    - 8000:8000
-  volumes:
-    - ${CONFIG}/config/yacht:/config
-    - /var/run/docker.sock:/var/run/docker.sock
-  image: selfhostedpro/yacht
-
-volumes:
-  yacht:
 ```
 
-Things to notice:
-
-- I use the host network to simplify configuration. The web ui is located on port `8000` (web UI).
-
-Then run the container with `docker-compose up -d yacht`.
-To follow container logs, run `docker-compose logs -f yacht`.
-
-#### Configuration
-
-You should be able to login on the web UI (`localhost:8000`, replace `localhost` by your machine ip if needed).
-
-The default username is `admin@yacht.local` and password is `pass`.
-
-### Setup Transmission
-
-#### Docker container
-
-We'll use Transmission Docker image from linuxserver, which runs both the Transmission daemon and web UI in a single container.
-If you prefere Deluge just comment those lines in `docker-compose.yml`
-
-```yaml
-transmission:
-  image: linuxserver/transmission:latest
-  container_name: transmission
-  restart: unless-stopped
-  network_mode: service:vpn # run on the vpn network
-  environment:
-    - PUID=${PUID} # default user id, defined in .env
-    - PGID=${PGID} # default group id, defined in .env
-    - TZ=${TZ} # timezone, defined in .env
-  volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${CONFIG}/config/transmission:/config # config files
-```
-
-Things to notice:
-
-- I use the host network to simplify configuration. Important ports are `9091` (web UI) and `51413` (bittorrent daemon).
-
-Then run the container with `docker-compose up -d`.
-To follow container logs, run `docker-compose logs -f transmission`.
-
-#### Configuration
-
-_instruction not updated for transmission but should be pretty much the same_
-
-You should be able to login on the web UI (`localhost:9091`, replace `localhost` by your machine ip if needed).
-
-The default password is `admin`. You are asked to modify it, I chose to set an empty one since transmission won't be accessible from outside my local network.
-
-The running deluge daemon should be automatically detected and appear as online, you can connect to it.
-
-You may want to change the download directory. I like to have to distinct directories for incomplete (ongoing) downloads, and complete (finished) ones.
-Also, I set up a blackhole directory: every torrent file in there will be downloaded automatically. This is useful for Jackett manual searches.
-
-You should activate `autoadd` in the plugins section: it adds supports for `.magnet` files.
-
-You can also tweak queue settings, defaults are fairly small. Also you can decide to stop seeding after a certain ratio is reached. That will be useful for Sonarr, since Sonarr can only remove finished downloads from deluge when the torrent has stopped seeding. Setting a very low ratio is not very fair though !
-
-Configuration gets stored automatically in your mounted volume (`${ROOT}/config/transmission`) to be re-used at container restart. Important files in there:
-
-- `auth` contains your login/password
-- `core.conf` contains your deluge configuration
-
-You can use the Web UI manually to download any torrent from a .torrent file or magnet hash.
-
-You should also add a [blacklist](https://giuliomac.wordpress.com/2014/02/19/best-blocklist-for-transmission/) for extra protection
-
-### Setup Deluge
-
-#### Docker container
-
-We'll use Deluge Docker image from linuxserver, which runs both the Deluge daemon and web UI in a single container.
-If you prefere Transmission just comment those lines in `docker-compose.yml`
-
-```yaml
-deluge:
-  container_name: deluge
-  image: linuxserver/deluge:latest
-  restart: unless-stopped
-  network_mode: service:vpn # run on the vpn network
-  environment:
-    - PUID=${PUID} # default user id, defined in .env
-    - PGID=${PGID} # default group id, defined in .env
-    - TZ=${TZ} # timezone, defined in .env
-  volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${CONFIG}/config/deluge:/config # config files
-```
-
-Things to notice:
-
-- I use the host network to simplify configuration. Important ports are `8112` (web UI).
-
-Then run the container with `docker-compose up -d`.
-To follow container logs, run `docker-compose logs -f deluge`.
-
-#### Configuration
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-deluge)
-
-### Setup a VPN Container
-
-#### Introduction
-
-The goal here is to have an NordVPN Client container running and always connected. We'll make Transmission and/or Deluge incoming and outgoing traffic go through this NordVPN container.
-
-This must come up with some safety features:
-
-1. VPN connection should be restarted if not responsive
-1. Traffic should be allowed through the VPN tunnel _only_, no leaky outgoing connection if the VPN is down
-1. Transmission Web UI should still be reachable from the local network
-
-#### Docker container
-
-Put it in the docker-compose file, and make transmissionand/or Deluge use the vpn container network:
-
-```yaml
-vpn:
-  container_name: vpn
-  image: bubuntux/nordvpn:latest
-  cap_add:
-    - net_admin # required to modify network interfaces
-  restart: unless-stopped
-  devices:
-    - /dev/net/tun
-  environment:
-    - USER=${VPN_USER} # vpn user, defined in .env
-    - PASS=${VPN_PASSWORD} # vpn password, defined in .env
-    - COUNTRY=${VPN_COUNTRY} # vpn country, defined in .env
-    - NETWORK=${NETWORK} # local network mask, defined in .env
-    - PROTOCOL=UDP
-    - CATEGORY=P2P
-    - OPENVPN_OPTS=--pull-filter ignore "ping-restart" --ping-exit 180
-    - TZ=${TZ} # timezone, defined in .env
-  ports:
-    - 9091:9091 # Transmission web UI
-    - 51413:51413 # Transmission bittorrent daemon
-    - 51413:51413/udp # Transmission bittorrent daemon
-    - 8112:8112 # port for deluge web UI to be reachable from local network
-
-transmission:
-  image: linuxserver/transmission:latest
-  container_name: transmission
-  restart: unless-stopped
-  network_mode: service:vpn # run on the vpn network
-  environment:
-    - PUID=${PUID} # default user id, defined in .env
-    - PGID=${PGID} # default group id, defined in .env
-    - TZ=${TZ} # timezone, defined in .env
-  volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${CONFIG}/config/transmission:/config # config files
-
-deluge:
-  container_name: deluge
-  image: linuxserver/deluge:latest
-  restart: unless-stopped
-  network_mode: service:vpn # run on the vpn network
-  environment:
-    - PUID=${PUID} # default user id, defined in .env
-    - PGID=${PGID} # default group id, defined in .env
-    - TZ=${TZ} # timezone, defined in .env
-  volumes:
-    - ${ROOT}/downloads:/downloads # downloads folder
-    - ${CONFIG}/config/deluge:/config # config files
-```
-
-Notice how transmission and/or Deluge is now using the vpn container network, with Transmission and/or Deluge web UI port exposed on the vpn container for local network access.
-
-You can check that Transmission and/or Deluge is properly going out through the VPN IP by using [torguard check](https://torguard.net/checkmytorrentipaddress.php).
-Get the torrent magnet link there, put it in Transmission and/or Deluge, wait a bit, then you should see your outgoing torrent IP on the website.
-
-![Torrent guard](img/torrent_guard.png)
-
-### Setup Jackett
-
-#### Indexers
-
-1. 1337x
-1. cpasbien (always failed)
-1. RARBG
-1. The Pirate Bay
-1. LimeTorrents
-1. Torrent9
-1. Torrentz2
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-jackett)
-
-### Setup NZBGet
-
-Uncomment container instructions in `docker.compose.yml`
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-nzbget)
-
-### Setup Plex
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-plex)
-
-### Setup Sonarr
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-sonarr)
-
-### Setup Radarr
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-radarr)
-
-### Setup Bazarr
-
-[See original instructions](https://github.com/sebgl/htpc-download-box#setup-bazarr)
 
 #### Remotly Add Movies Using trakt.tv And List
 
@@ -461,6 +232,7 @@ dtoverlay=pi3-disable-bt
 ## Going Further
 
 [See original instructions](https://github.com/sebgl/htpc-download-box#going-further)
+
 
 ## Usefull Commands
 
