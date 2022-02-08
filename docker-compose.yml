@@ -111,5 +111,3 @@ services:
       - ${ROOT}/config/bazarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/complete/tv:/tv # tv shows folder
-    ports:
-      - 6767:6767
