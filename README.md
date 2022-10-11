@@ -809,10 +809,8 @@ Congrats! You now have a single webpage with all the tabs consolidated and avail
 Some stuff worth looking at that I do not use at the moment:
 
 - [NZBHydra](https://github.com/theotherp/nzbhydra): meta search for NZB indexers (like [Jackett](https://github.com/Jackett/Jackett) does for torrents). Could simplify and centralise nzb indexers configuration at a single place.
-- [Organizr](https://github.com/causefx/Organizr): Embed all these services in a single webpage with tab-based navigation
 - [Plex sharing features](https://www.plex.tv/features/#feat-modal)
 - [Headphones](https://github.com/rembo10/headphones): Automated music download. Like Sonarr but for music albums. I've been using it for a while, but it did not give me satisfying results. I also tend to rely entirely on a Spotify premium account to manage my music collection now.
 - [Mylar](https://github.com/evilhero/mylar): like Sonarr, but for comic books.
-- [Ombi](http://www.ombi.io/): Web UI to give your shared Plex instance users the ability to request new content
 - [PlexPy](https://github.com/JonnyWong16/plexpy): Monitoring interface for Plex. Useful is you share your Plex server to multiple users.
 - Radarr lists automated downloads, to fetch best movies automatically. [Rotten Tomatoes certified movies](https://www.rottentomatoes.com/browse/cf-in-theaters/) would be a nice list to parse and get automatically.
