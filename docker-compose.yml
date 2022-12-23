@@ -28,32 +28,20 @@ services:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
 
-  jackett:
-    container_name: jackett
-    image: linuxserver/jackett:latest
-    restart: unless-stopped
-    network_mode: host
+  prowlarr:
+    container_name: prowlarr
+    image: linuxserver/prowlarr:nightly
+    ports:
+      - "9696:9696"
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
+      - UMASK=002
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-      - ${ROOT}/config/jackett:/config # config files
-
-  nzbget:
-    container_name: nzbget
-    image: linuxserver/nzbget:latest
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
-    volumes:
-      - ${ROOT}/downloads:/downloads # download folder
-      - ${ROOT}/config/nzbget:/config # config files
+      - /media/config/prowlarr:/config # config files
+      - /media/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download / I added as jackett had it. testing if necessary
 
   sonarr:
     container_name: sonarr
@@ -112,17 +100,45 @@ services:
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/complete/tv:/tv # tv shows folder
 
-  ombi:
-    container_name: ombi
-    image: linuxserver/ombi
-    restart: unless-stopped
-    network_mode: host
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
     environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
     volumes:
-      - ${ROOT}/config/ombi:/config
+      - ${ROOT}/config/overseerr:/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+
+
+  tdarr:
+    container_name: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 8265:8265 # webUI port
+      - 8266:8266 # server port
+      - 8267:8267 # Internal node port
+      - 8268:8268 # Example extra node port
+    environment:
+      - TZ=Europe/London
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - nodeID=MyInternalNode
+    volumes:
+      - ${ROOT}/config/tdarr/server:/app/server
+      - ${ROOT}/config/tdarr/configs:/app/configs
+      - ${ROOT}/config/tdarr/logs:/app/logs
+      - ${ROOT}/config/tdarr/transcode_cache:/temp
 
   organizr:
     container_name: organizr
