@@ -13,7 +13,7 @@ services:
       - SERVER_REGIONS=Netherlands
     ports:
       - 8112:8112 # deluge
-
+ 
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
@@ -26,7 +26,7 @@ services:
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
-
+ 
   prowlarr:
     container_name: prowlarr
     image: linuxserver/prowlarr:nightly
@@ -39,9 +39,9 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /media/config/prowlarr:/config # config files
-      - /media/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download / I added as jackett had it. testing if necessary
-
+      - ${ROOT}/config/prowlarr:/config # config files
+      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download / I added as jackett had it. testing if necessary
+ 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
@@ -56,7 +56,7 @@ services:
       - ${ROOT}/config/sonarr:/config # config files
       - ${ROOT}/complete/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
-
+ 
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
@@ -71,7 +71,7 @@ services:
       - ${ROOT}/config/radarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
-
+ 
   plex-server:
     container_name: plex-server
     image: plexinc/pms-docker:latest
@@ -83,7 +83,7 @@ services:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
       - ${ROOT}/complete:/data # media library
-
+ 
   bazarr:
     container_name: bazarr
     image: linuxserver/bazarr
@@ -98,7 +98,7 @@ services:
       - ${ROOT}/config/bazarr:/config # config files
       - ${ROOT}/complete/movies:/movies # movies folder
       - ${ROOT}/complete/tv:/tv # tv shows folder
-
+ 
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
@@ -111,8 +111,8 @@ services:
     ports:
       - 5055:5055
     restart: unless-stopped
-
-
+ 
+ 
   tdarr:
     container_name: tdarr
     image: ghcr.io/haveagitgat/tdarr:latest
@@ -138,7 +138,7 @@ services:
       - ${ROOT}/config/tdarr/configs:/app/configs
       - ${ROOT}/config/tdarr/logs:/app/logs
       - ${ROOT}/config/tdarr/transcode_cache:/temp
-
+ 
   organizr:
     container_name: organizr
     image: organizr/organizr
