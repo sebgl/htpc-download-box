@@ -26,7 +26,19 @@ services:
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
- 
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=${TZ}
+    ports:
+      - "${PORT:-8191}:8191"
+    restart: unless-stopped  
+      
   prowlarr:
     container_name: prowlarr
     image: linuxserver/prowlarr:nightly
@@ -113,31 +125,31 @@ services:
     restart: unless-stopped
  
  
-  tdarr:
-    container_name: tdarr
-    image: ghcr.io/haveagitgat/tdarr:latest
-    restart: unless-stopped
-    network_mode: bridge
-    ports:
-      - 8265:8265 # webUI port
-      - 8266:8266 # server port
-      - 8267:8267 # Internal node port
-      - 8268:8268 # Example extra node port
-    environment:
-      - TZ=Europe/London
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK_SET=002
-      - serverIP=0.0.0.0
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-      - nodeID=MyInternalNode
-    volumes:
-      - ${ROOT}/config/tdarr/server:/app/server
-      - ${ROOT}/config/tdarr/configs:/app/configs
-      - ${ROOT}/config/tdarr/logs:/app/logs
-      - ${ROOT}/config/tdarr/transcode_cache:/temp
+      # tdarr:
+      #   container_name: tdarr
+      #   image: ghcr.io/haveagitgat/tdarr:latest
+      #   restart: unless-stopped
+      #   network_mode: bridge
+      #   ports:
+      #     - 8265:8265 # webUI port
+      #     - 8266:8266 # server port
+      #     - 8267:8267 # Internal node port
+      #     - 8268:8268 # Example extra node port
+      #   environment:
+      #     - TZ=Europe/London
+      #     - PUID=${PUID}
+      #     - PGID=${PGID}
+      #     - UMASK_SET=002
+      #     - serverIP=0.0.0.0
+      #     - serverPort=8266
+      #     - webUIPort=8265
+      #     - internalNode=true
+      #     - nodeID=MyInternalNode
+      #   volumes:
+      #     - ${ROOT}/config/tdarr/server:/app/server
+      #     - ${ROOT}/config/tdarr/configs:/app/configs
+      #     - ${ROOT}/config/tdarr/logs:/app/logs
+      #     - ${ROOT}/config/tdarr/transcode_cache:/temp
  
   organizr:
     container_name: organizr
