@@ -1,32 +1,40 @@
 version: "3.4"
 services:
-  vpn:
-    container_name: vpn
-    image: dperson/openvpn-client:latest
+  gluetun:
+    image: qmcgaw/gluetun:latest
     cap_add:
-      - net_admin # required to modify network interfaces
-    restart: unless-stopped
-    volumes:
-      - /dev/net:/dev/net:z # tun device
-      - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
-    security_opt:
-      - label:disable
-    ports:
-      - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
-
-  deluge:
-    container_name: deluge
-    image: linuxserver/deluge:latest
-    restart: unless-stopped
-    network_mode: service:vpn # run on the vpn network
+      - NET_ADMIN
     environment:
-      - PUID=${PUID} # default user id, defined in .env
-      - PGID=${PGID} # default group id, defined in .env
-      - TZ=${TZ} # timezone, defined in .env
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=aCIUxUicxYL9CCE8L1FQhPAznzYt9Q+WIPuMiibRsX8=
+      - WIREGUARD_ADDRESSES= 10.2.0.2/32
+      - SERVER_COUNTRIES=Canada
     volumes:
-      - ${ROOT}/downloads:/downloads # downloads folder
-      - ${ROOT}/config/deluge:/config # config files
+      - ${CONFIG}/gluetun:/config
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    devices:
+      - /dev/net/tun:/dev/net/tun    
+    restart: always
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+    volumes:
+      - ${CONFIG}/qbittorrent:/config
+      - ${ROOT}/downloads:/downloads
+    depends_on:
+      gluetun:
+        condition: service_healthy
 
   jackett:
     container_name: jackett
@@ -39,8 +47,8 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/downloads/torrent-blackhole:/downloads # place where to put .torrent files for manual download
-      - ${ROOT}/config/jackett:/config # config files
+      - ${ROOT}/downloads/torrent-blackhole:/downloads
+      - ${CONFIG}/jackett:/config
 
   nzbget:
     container_name: nzbget
@@ -53,7 +61,7 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - ${ROOT}/downloads:/downloads # download folder
-      - ${ROOT}/config/nzbget:/config # config files
+      - ${CONFIG}/nzbget:/config # config files
 
   sonarr:
     container_name: sonarr
@@ -66,8 +74,8 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/config/sonarr:/config # config files
-      - ${ROOT}/complete/tv:/tv # tv shows folder
+      - ${CONFIG}/sonarr:/config # config files
+      - ${ROOT}/tv:/tv # tv shows folder
       - ${ROOT}/downloads:/downloads # download folder
 
   radarr:
@@ -81,8 +89,8 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/config/radarr:/config # config files
-      - ${ROOT}/complete/movies:/movies # movies folder
+      - ${CONFIG}/radarr:/config # config files
+      - ${ROOT}/movies:/movies # movies folder
       - ${ROOT}/downloads:/downloads # download folder
 
   plex-server:
@@ -93,9 +101,9 @@ services:
       - TZ=${TZ} # timezone, defined in .env
     network_mode: host
     volumes:
-      - ${ROOT}/config/plex/db:/config # plex database
-      - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete:/data # media library
+      - ${ROOT}/plex/db:/config # plex database
+      - ${ROOT}/plex/transcode:/transcode # temp transcoded files
+      - ${ROOT}:/data # media library
 
   bazarr:
     container_name: bazarr
@@ -108,6 +116,6 @@ services:
       - TZ=${TZ} # timezone, defined in .env
       - UMASK_SET=022 #optional
     volumes:
-      - ${ROOT}/config/bazarr:/config # config files
-      - ${ROOT}/complete/movies:/movies # movies folder
-      - ${ROOT}/complete/tv:/tv # tv shows folder
+      - ${CONFIG}/bazarr:/config # config files
+      - ${ROOT}/movies:/movies # movies folder
+      - ${ROOT}/tv:/tv # tv shows folder
