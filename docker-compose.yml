@@ -6,6 +6,8 @@ services:
     cap_add:
       - net_admin # required to modify network interfaces
     restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
     volumes:
       - /dev/net:/dev/net:z # tun device
       - ${ROOT}/config/vpn:/vpn # OpenVPN configuration
